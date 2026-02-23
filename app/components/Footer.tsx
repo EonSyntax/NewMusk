@@ -1,0 +1,154 @@
+import React from "react";
+
+// Footer Component
+export const Footer = () => {
+  return (
+    <footer className="bg-white border-t border-slate-200 pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          {/* Company Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="text-primary">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    clipRule="evenodd"
+                    d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z"
+                    fill="currentColor"
+                    fillRule="evenodd"
+                  ></path>
+                  <path
+                    clipRule="evenodd"
+                    d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z"
+                    fill="currentColor"
+                    fillRule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+              <span className="text-lg font-bold">NewMusk Blogs</span>
+            </div>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              The future of news is decentralized, fast, and built for you.
+              Delivering world-class journalism since 2024.
+            </p>
+            <div className="flex gap-4">
+              <a
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-primary hover:text-white transition-all"
+                href="#"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                </svg>
+              </a>
+              <a
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-primary hover:text-white transition-all"
+                href="#"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+          {/* Categories */}
+          <div className="space-y-4">
+            <h4 className="font-bold text-slate-900">Categories</h4>
+            <ul className="text-sm text-slate-500 space-y-2">
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Technology
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Business
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Politics
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Sports & Entertainment
+                </a>
+              </li>
+            </ul>
+          </div>
+          {/* Company */}
+          <div className="space-y-4">
+            <h4 className="font-bold text-slate-900">Company</h4>
+            <ul className="text-sm text-slate-500 space-y-2">
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Contact
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Advertise
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Careers
+                </a>
+              </li>
+            </ul>
+          </div>
+          {/* Legal */}
+          <div className="space-y-4">
+            <h4 className="font-bold text-slate-900">Legal</h4>
+            <ul className="text-sm text-slate-500 space-y-2">
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary transition-colors" href="#">
+                  Cookie Policy
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-slate-400">
+            Copyright © 2026 NewMusk Blogs. All rights reserved.
+          </p>
+          <div className="flex gap-6">
+            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px]">
+                public
+              </span>
+              Global Edition
+            </span>
+            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px]">
+                verified
+              </span>
+              Fact Checked
+            </span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
