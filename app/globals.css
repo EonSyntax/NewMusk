@@ -9,7 +9,7 @@
 
 @theme inline {
   --font-inter: var(--font-inter);
-  --font-manrope: var(--font-manrope);
+  --font-grotesk: var(--font-grotesk);
   --color-primary: var(--primary);
   --color-primary-rgb: var(--primary-rgb);
   --color-background-light: var(--background-light);
@@ -20,7 +20,7 @@
   body {
     background-color: var(--color-background-light);
     color: rgb(15 23 42);
-    font-family: var(--font-display), system-ui, sans-serif;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 
   .skeleton {
