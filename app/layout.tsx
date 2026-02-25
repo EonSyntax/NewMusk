@@ -13,7 +13,7 @@ const grotesk = Space_Grotesk({
 });
 
 
-export const metadata: Metadata = {
+export const viewport: Metadata = {
   title: "NewMusk Blogs | Modern News Portal",
   description:
     "Stay ahead of the curve with daily insights into tech, finance, and global politics.",
