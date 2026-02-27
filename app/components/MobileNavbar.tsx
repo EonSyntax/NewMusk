@@ -184,6 +184,17 @@ const MobileNavbar = ({
                 3
               </div>
             </Link>
+            <div className="w-full flex flex-col gap-4 items-center justify-center">
+            <Link href="/login" className="w-50 flex items-center justify-center gap-2 py-3 px-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+            <span className="material-symbols-outlined text-lg">login</span>
+            Login
+          </Link>
+
+          <Link href="/signup" className="w-50 flex items-center justify-center gap-2 py-3 px-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+            <span className="material-symbols-outlined text-lg">login</span>
+            Sign Up
+          </Link>
+            </div>
           </div>
         </div>
         {/* Bottom Action Footer */}
