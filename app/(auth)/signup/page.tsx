@@ -1,6 +1,39 @@
+"use client";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function SignUp() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // 1️⃣ Check passwords match
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return; // Stop submission
+    }
+
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ email, password, full_name: fullName }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const data = await res.json();
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+    alert(
+      data.message || "Signup successful, confirm in your email to continue",
+    );
+    window.location.href = "/login";
+  };
+
   return (
     <div className="bg-background-light dark:bg-background-dark font-grotesk text-slate-900 dark:text-slate-100 min-h-screen relative">
       {/* Floating Go to Home Button */}
@@ -122,7 +155,7 @@ export default function SignUp() {
                 </span>
               </button>
             </div>
-            <form className="mt-8 space-y-6">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
               <div className="space-y-4">
                 <div>
                   <label
@@ -139,6 +172,8 @@ export default function SignUp() {
                     placeholder="Elon Reeve Musk"
                     required
                     type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                   />
                 </div>
                 <div>
@@ -156,6 +191,8 @@ export default function SignUp() {
                     placeholder="elon@newmusk.com"
                     required
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div>
@@ -174,6 +211,8 @@ export default function SignUp() {
                       placeholder="••••••••"
                       required
                       type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors"
@@ -201,6 +240,8 @@ export default function SignUp() {
                       placeholder="••••••••"
                       required
                       type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     <button
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors"
@@ -211,30 +252,6 @@ export default function SignUp() {
                       </span>
                     </button>
                   </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    className="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded cursor-pointer"
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                  />
-                  <label
-                    className="ml-2 block text-sm text-slate-700 dark:text-slate-300 cursor-pointer"
-                    htmlFor="remember-me"
-                  >
-                    Remember me
-                  </label>
-                </div>
-                <div className="text-sm">
-                  <a
-                    className="font-semibold text-primary hover:text-primary/80 transition-colors"
-                    href="#"
-                  >
-                    Forgot password?
-                  </a>
                 </div>
               </div>
               <div>

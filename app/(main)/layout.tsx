@@ -1,7 +1,7 @@
 import React from "react";
-import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
-
+import MobileNavbarClient from "../components/navbar/MobileNavbarClient";
+import Navbar from "../components/navbar/Navbar";
 
 export default function BlogLayout({
   children,
@@ -11,6 +11,7 @@ export default function BlogLayout({
   return (
     <>
       <Navbar />
+      <MobileNavbarClient />
       {children}
       <Footer />
     </>

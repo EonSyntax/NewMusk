@@ -1,6 +1,25 @@
+"use client";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const data = await res.json();
+    if (data.error) alert(data.error);
+    else alert("Login successful!");
+  };
+
   return (
     <div className="bg-background-light dark:bg-background-dark font-grotesk text-slate-900 dark:text-slate-100 min-h-screen relative">
       {/* Floating Go to Home Button */}
@@ -122,7 +141,7 @@ export default function Login() {
                 </span>
               </button>
             </div>
-            <form className="mt-8 space-y-6">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
               <div className="space-y-4">
                 <div>
                   <label
@@ -139,6 +158,8 @@ export default function Login() {
                     placeholder="name@company.com"
                     required
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div>
@@ -157,6 +178,8 @@ export default function Login() {
                       placeholder="••••••••"
                       required
                       type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors"
