@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React, { useState } from "react";
 
 export default function AdminSidebar() {
@@ -28,24 +29,24 @@ export default function AdminSidebar() {
           ></div>
           {/* Sidebar Drawer */}
           <aside className="fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300">
-            <div className="flex justify-between items-center p-2 mb-5">
-              <img
-                className="h-12 w-auto"
-                alt="NewMusk Blogs logo"
-                src="/images/newmusk.png"
-                style={{ objectFit: "contain" }}
-              />
-              <button
-                className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400"
-                onClick={handleClose}
-                aria-label="Close admin sidebar"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-widest text-center mb-2">
-              Blogs Admin
-            </p>
+              <Link href="/" className="flex justify-between items-center p-2 mb-5">
+                <img
+                  className="h-12 w-auto"
+                  alt="NewMusk Blogs logo"
+                  src="/images/newmusk.png"
+                  style={{ objectFit: "contain" }}
+                />
+                <button
+                  className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400"
+                  onClick={handleClose}
+                  aria-label="Close admin sidebar"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </Link>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-widest text-center mb-2">
+                Blogs Admin
+              </p>
             <nav className="flex-1 px-4 pb-4 space-y-1">
               <a
                 className="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-semibold transition-colors"
@@ -113,7 +114,7 @@ export default function AdminSidebar() {
 
       {/* Sidebar for desktop */}
       <aside className="hidden lg:flex w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col transition-all duration-300">
-        <div className=" p-2 mb-5 flex flex-col items-center gap-1">
+        <Link href="/" className=" p-2 mb-5 flex flex-col items-center gap-1">
           <img
             className="h-12 w-auto"
             alt="NewMusk Blogs logo"
@@ -123,7 +124,7 @@ export default function AdminSidebar() {
           <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
             Blogs Admin
           </p>
-        </div>
+        </Link>
         <nav className="flex-1 px-4 pb-4 space-y-1">
           <a
             className="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-semibold transition-colors"

@@ -18,6 +18,7 @@ export default function Login() {
     const data = await res.json();
     if (data.error) alert(data.error);
     else alert("Login successful!");
+    window.location.href = "/";
   };
 
   return (

@@ -1,12 +1,26 @@
 import Link from "next/link";
 import MobileHamburgerClient from "./MobileHamburgerClient";
-import { cookies } from "next/headers";
+import SignOutButton from "./SignOutButton";
+import { createServerSupabase } from "@/lib/supabase/publishServer";
 
 export default async function Navbar() {
-  // Server-side: get access token from cookies
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("sb-access-token")?.value;
-  const isLoggedIn = !!accessToken;
+  const supabase = await createServerSupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let role: string | null = null;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
+
+    role = profile?.role ?? null;
+  }
 
   return (
     <>
@@ -51,7 +65,7 @@ export default async function Navbar() {
               </button>
               <MobileHamburgerClient />
               <div>
-                {!isLoggedIn ? (
+                {!user ? (
                   <div className="hidden sm:flex items-center gap-2">
                     <Link
                       href="/login"
@@ -90,20 +104,15 @@ export default async function Navbar() {
                         >
                           Go to Profile
                         </Link>
-                        <Link
-                          href="/admin"
-                          className="block px-5 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors font-semibold"
-                        >
-                          Go to Admin Page
-                        </Link>
-                        <form action="/api/auth/signout" method="POST">
-                          <button
-                            type="submit"
-                            className="block w-full text-left px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-xl transition-colors font-semibold"
+                        {role === "admin" || role === "superAdmin" ? (
+                          <Link
+                            href="/admin"
+                            className="block px-5 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors font-semibold"
                           >
-                            Sign Out
-                          </button>
-                        </form>
+                            Go to Admin Page
+                          </Link>
+                        ) : null}
+                        <SignOutButton />
                       </div>
                     </div>
                   </div>

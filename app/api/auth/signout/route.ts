@@ -1,11 +1,9 @@
-// app/api/auth/login/route.ts
-import { NextRequest, NextResponse } from "next/server";
+// app/api/auth/signout/route.ts
+import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function POST(req: NextRequest) {
-  const { email, password } = await req.json();
-
+export async function POST() {
   const cookieStore = await cookies();
 
   const supabase = createServerClient(
@@ -25,17 +23,8 @@ export async function POST(req: NextRequest) {
     }
   );
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  // ⚠️ DO NOT set cookies manually
-  // Supabase SSR already did it via setAll()
+  // ✅ This clears ALL Supabase auth cookies correctly
+  await supabase.auth.signOut();
 
   return NextResponse.json({ success: true });
 }

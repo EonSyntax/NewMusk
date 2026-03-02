@@ -1,36 +1,41 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
 
-export default function SignUp() {
+import { useState } from "react";
+import Link from "next/link";
+
+export default function SignUpPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1️⃣ Check passwords match
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return; // Stop submission
+      alert("Passwords do not match.");
+      return;
     }
+
 
     const res = await fetch("/api/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ email, password, full_name: fullName }),
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name: fullName,
+      }),
     });
 
     const data = await res.json();
-    if (data.error) {
-      alert(data.error);
+
+    if (!res.ok) {
+      alert(data.error || "Signup failed.");
       return;
     }
-    alert(
-      data.message || "Signup successful, confirm in your email to continue",
-    );
+
+    alert(data.message);
     window.location.href = "/login";
   };
 

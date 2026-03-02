@@ -1,5 +1,4 @@
-import { Navbar } from "@/app/components/Navbar";
-import React from "react";
+import Navbar from "@/app/components/navbar/Navbar";
 
 export default function UserProfile() {
   return (

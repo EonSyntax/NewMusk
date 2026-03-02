@@ -1,5 +1,6 @@
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
+import Link from "next/link";
 import React from "react";
 
 export default function AdminPostDashboard() {
@@ -22,10 +23,10 @@ export default function AdminPostDashboard() {
                   Manage and moderate all blog content from one central hub.
                 </p>
               </div>
-              <button className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all self-start">
+              <Link href="/admin/posts/create-post" className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all self-start">
                 <span className="material-symbols-outlined text-lg">add</span>
-                <span>Create New Post</span>
-              </button>
+                <span>New Post</span>
+              </Link>
             </div>
             {/* <!-- Filter & Search Bar --> */}
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-3 mb-6">
