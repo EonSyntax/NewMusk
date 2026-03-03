@@ -8,7 +8,7 @@ export default async function EditPostPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-    const { id } = await params;
+  const { id } = await params;
   const supabase = await createReadOnlySupabase();
 
   // 🔐 Auth
@@ -38,6 +38,19 @@ export default async function EditPostPage({
 
   if (!post) return notFound();
 
+  // Fetch selected categories for the post
+  const { data: selectedCategories } = await supabaseAdmin
+    .from("post_categories")
+    .select("category_id")
+    .eq("post_id", id);
+
+  const selectedIds = selectedCategories?.map((c) => c.category_id) || [];
+
+  const { data: categories } = await supabaseAdmin
+    .from("categories")
+    .select("id, name")
+    .order("name");
+
   // 🔐 Ownership check
   if (!isSuperAdmin && post.author_id !== user.id) {
     redirect("/admin/posts");
@@ -63,18 +76,28 @@ export default async function EditPostPage({
         required
       />
 
-      <select
-        name="status"
-        defaultValue={post.status}
-        className="border p-2"
-      >
+      <div>
+        <p className="font-semibold mb-2">Categories</p>
+        {categories?.map((cat) => (
+        <label key={cat.id} className="block">
+          <input
+            type="checkbox"
+            name="categories"
+            value={cat.id}
+            defaultChecked={selectedIds.includes(cat.id)}
+            className="mr-2"
+          />
+          {cat.name}
+        </label>
+        ))}
+      </div>
+
+      <select name="status" defaultValue={post.status} className="border p-2">
         <option value="draft">Draft</option>
         <option value="published">Published</option>
       </select>
 
-      <button className="bg-black text-white px-6 py-2">
-        Update Post
-      </button>
+      <button className="bg-black text-white px-6 py-2">Update Post</button>
     </form>
   );
 }

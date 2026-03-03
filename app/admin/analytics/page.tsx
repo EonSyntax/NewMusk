@@ -284,23 +284,23 @@ export default function AdminAnalytics() {
                         className="stroke-primary"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke-dasharray="45, 100"
+                        strokeDasharray="45, 100"
                         strokeWidth="4"
                       ></path>
                       <path
                         className="stroke-indigo-400"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke-dasharray="25, 100"
-                        stroke-dashoffset="-45"
+                        strokeDasharray="25, 100"
+                        strokeDashoffset="-45"
                         strokeWidth="4"
                       ></path>
                       <path
                         className="stroke-purple-300"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke-dasharray="15, 100"
-                        stroke-dashoffset="-70"
+                        strokeDasharray="15, 100"
+                        strokeDashoffset="-70"
                         strokeWidth="4"
                       ></path>
                     </svg>

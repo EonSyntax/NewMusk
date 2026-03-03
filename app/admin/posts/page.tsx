@@ -5,6 +5,27 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 
+
+type PostWithRelations = {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+  author_id: string;
+  profiles: {
+    full_name: string;
+    avatar_url: string | null;
+  } | null;
+  post_categories: {
+    categories: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  }[];
+};
+
 export default async function AdminPostsDashboard() {
   const supabase = await createReadOnlySupabase();
 
@@ -27,19 +48,30 @@ export default async function AdminPostsDashboard() {
   const isSuperAdmin = profile.role === "superAdmin";
 
   // 📦 Fetch posts
-  const { data: posts, error } = await supabaseAdmin
-    .from("posts")
-    .select(
-      `
+  const { data, error } = await supabaseAdmin
+  .from("posts")
+  .select(`
     id,
     title,
     slug,
     status,
     created_at,
-    author_id
-  `,
+    author_id,
+    profiles (
+      full_name,
+      avatar_url
+    ),
+    post_categories (
+      categories (
+        id,
+        name,
+        slug
+      )
     )
-    .order("created_at", { ascending: false });
+  `)
+  .order("created_at", { ascending: false });
+
+const posts = data as PostWithRelations[] | null;
 
   const canModifyPost = (postAuthorId: string) => {
     return isSuperAdmin || postAuthorId === user.id;
@@ -182,11 +214,27 @@ export default async function AdminPostsDashboard() {
                               }}
                             ></div>
                             <span className="text-sm font-medium">
-                              Jordan Lee
+                              {post.profiles?.full_name ?? "Unknown"}
                             </span>
                           </div>
                         </td>
-                        <td className="p-4 text-sm">Technology</td>
+                        <td className="p-4 text-sm">
+                          {post.post_categories &&
+                          post.post_categories.length > 0 ? (
+                            post.post_categories.map((pc: any) => (
+                              <span
+                                key={pc.categories.id}
+                                className="inline-block mr-2 px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 rounded"
+                              >
+                                {pc.categories.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-slate-400">
+                              Uncategorized
+                            </span>
+                          )}
+                        </td>
                         <td className="p-4 text-center">
                           <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-primary">
                             <span className="inline-block h-3.5 w-3.5 translate-x-5 transform rounded-full bg-white transition"></span>

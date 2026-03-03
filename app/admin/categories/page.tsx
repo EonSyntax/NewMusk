@@ -1,8 +1,36 @@
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
+import { supabaseAdmin } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import AddCategoryDrawerClientBridge from "@/app/components/AddCategoryDrawerClientBridge";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
+import PostCountBadge from "@/app/components/postCountBadge";
 
-export default function AdminCategories() {
+export default async function AdminCategories() {
+  const supabase = await createReadOnlySupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  // Optional: restrict to admin/superAdmin
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile || (profile.role !== "admin" && profile.role !== "superAdmin")) {
+    redirect("/");
+  }
+
+  // Fetch categories
+  const { data: categories } = await supabaseAdmin
+    .from("categories")
+    .select("*")
+    .order("created_at", { ascending: false });
   return (
     <>
       <div className="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
@@ -64,8 +92,8 @@ export default function AdminCategories() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {/* <!-- Row 1 --> */}
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+                      {categories?.map((category) => (
+                      <tr key={category.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
                         <td className="px-6 py-4">
                           <input
                             className="rounded border-slate-300 text-primary focus:ring-primary"
@@ -80,18 +108,18 @@ export default function AdminCategories() {
                               </span>
                             </div>
                             <span className="font-semibold text-slate-800 dark:text-slate-200">
-                              Technology
+                              {category.name}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
-                            technology
+                            {category.slug}
                           </code>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                            24 posts
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                           <PostCountBadge categoryId={category.id} />
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
@@ -112,6 +140,7 @@ export default function AdminCategories() {
                           </button>
                         </td>
                       </tr>
+                      ))}
                       {/* <!-- Row 2 --> */}
                       <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
                         <td className="px-6 py-4">
@@ -145,102 +174,6 @@ export default function AdminCategories() {
                         <td className="px-6 py-4 text-center">
                           <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-primary">
                             <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 text-right space-x-2">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              delete
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
-                      {/* <!-- Row 3 --> */}
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                        <td className="px-6 py-4">
-                          <input
-                            className="rounded border-slate-300 text-primary focus:ring-primary"
-                            type="checkbox"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="size-8 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                              <span className="material-symbols-outlined text-base">
-                                payments
-                              </span>
-                            </div>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">
-                              Personal Finance
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
-                            finance
-                          </code>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                            42 posts
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 dark:bg-slate-700">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1"></span>
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 text-right space-x-2">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              delete
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
-                      {/* <!-- Row 4 --> */}
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                        <td className="px-6 py-4">
-                          <input
-                            className="rounded border-slate-300 text-primary focus:ring-primary"
-                            type="checkbox"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="size-8 rounded bg-rose-500/10 flex items-center justify-center text-rose-500">
-                              <span className="material-symbols-outlined text-base">
-                                favorite
-                              </span>
-                            </div>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">
-                              Lifestyle
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
-                            lifestyle
-                          </code>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                            12 posts
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 dark:bg-slate-700">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1"></span>
                           </button>
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">

@@ -6,7 +6,8 @@ export default async function CreatePostPage() {
 
   const { data: categories } = await supabase
     .from("categories")
-    .select("id, name");
+    .select("id, name")
+    .order("name");
 
   return (
     <form action={createPost} className="space-y-6 max-w-3xl">
@@ -41,6 +42,11 @@ export default async function CreatePostPage() {
           </label>
         ))}
       </div>
+
+      <select name="status" className="border p-2">
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+      </select>
 
       <button className="bg-black text-white px-6 py-2">Save Draft</button>
     </form>
