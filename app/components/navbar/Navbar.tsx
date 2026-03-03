@@ -1,10 +1,10 @@
 import Link from "next/link";
 import MobileHamburgerClient from "./MobileHamburgerClient";
 import SignOutButton from "./SignOutButton";
-import { createServerSupabase } from "@/lib/supabase/publishServer";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 
 export default async function Navbar() {
-  const supabase = await createServerSupabase();
+  const supabase = await createReadOnlySupabase();
 
   const {
     data: { user },

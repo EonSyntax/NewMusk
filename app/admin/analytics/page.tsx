@@ -75,7 +75,7 @@ export default function AdminAnalytics() {
                         d="M0,20 L10,15 L20,18 L30,12 L40,14 L50,8 L60,10 L70,4 L80,7 L90,2 L100,5"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                       ></path>
                     </svg>
                   </div>
@@ -111,7 +111,7 @@ export default function AdminAnalytics() {
                         d="M0,20 L10,12 L20,10 L30,15 L40,12 L50,14 L60,8 L70,6 L80,10 L90,5 L100,8"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                       ></path>
                     </svg>
                   </div>
@@ -147,7 +147,7 @@ export default function AdminAnalytics() {
                         d="M0,18 L10,14 L20,16 L30,10 L40,12 L50,6 L60,8 L70,2 L80,5 L90,1 L100,4"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                       ></path>
                     </svg>
                   </div>
@@ -229,7 +229,7 @@ export default function AdminAnalytics() {
                       d="M0,150 Q100,100 200,120 T400,80 T600,100 T800,40 T1000,60"
                       fill="none"
                       stroke="#5100ff"
-                      stroke-width="3"
+                      strokeWidth="3"
                     ></path>
                     <defs>
                       <linearGradient
@@ -278,14 +278,14 @@ export default function AdminAnalytics() {
                         className="stroke-slate-100 dark:stroke-slate-800"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke-width="4"
+                        strokeWidth="4"
                       ></path>
                       <path
                         className="stroke-primary"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
                         stroke-dasharray="45, 100"
-                        stroke-width="4"
+                        strokeWidth="4"
                       ></path>
                       <path
                         className="stroke-indigo-400"
@@ -293,7 +293,7 @@ export default function AdminAnalytics() {
                         fill="none"
                         stroke-dasharray="25, 100"
                         stroke-dashoffset="-45"
-                        stroke-width="4"
+                        strokeWidth="4"
                       ></path>
                       <path
                         className="stroke-purple-300"
@@ -301,7 +301,7 @@ export default function AdminAnalytics() {
                         fill="none"
                         stroke-dasharray="15, 100"
                         stroke-dashoffset="-70"
-                        stroke-width="4"
+                        strokeWidth="4"
                       ></path>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">

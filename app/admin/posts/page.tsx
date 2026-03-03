@@ -1,9 +1,55 @@
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
 import Link from "next/link";
-import React from "react";
+import { supabaseAdmin } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 
-export default function AdminPostDashboard() {
+export default async function AdminPostsDashboard() {
+  const supabase = await createReadOnlySupabase();
+
+  // 🔐 Auth
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  // 🛡 Role
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) redirect("/");
+
+  const isSuperAdmin = profile.role === "superAdmin";
+
+  // 📦 Fetch posts
+  const { data: posts, error } = await supabaseAdmin
+    .from("posts")
+    .select(
+      `
+    id,
+    title,
+    slug,
+    status,
+    created_at,
+    author_id
+  `,
+    )
+    .order("created_at", { ascending: false });
+
+  const canModifyPost = (postAuthorId: string) => {
+    return isSuperAdmin || postAuthorId === user.id;
+  };
+
+  if (error) {
+    console.error("POST FETCH ERROR:", error);
+    return <p className="text-red-500">Failed to load posts</p>;
+  }
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
       <div className="flex h-screen overflow-hidden">
@@ -23,7 +69,10 @@ export default function AdminPostDashboard() {
                   Manage and moderate all blog content from one central hub.
                 </p>
               </div>
-              <Link href="/admin/posts/create-post" className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all self-start">
+              <Link
+                href="/admin/posts/create-post"
+                className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all self-start"
+              >
                 <span className="material-symbols-outlined text-lg">add</span>
                 <span>New Post</span>
               </Link>
@@ -99,337 +148,109 @@ export default function AdminPostDashboard() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {/* <!-- Row 1 --> */}
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-slate-300 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <a
-                          className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
-                          href="#"
-                        >
-                          The Future of Generative AI in Web Design
-                        </a>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Updated 2 hours ago
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-6 h-6 rounded-full bg-slate-200"
-                            data-alt="Author avatar"
-                            style={{"backgroundImage": "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDKunYtTLqhGQwKdWvnxOjPz28HlBRm33ozYi_CaIwq00ZvVu4z3psbXcGHbPOmHUvazJNxkyXetGzEdb2rX5n2LXAMQrp5h8y9OCHRxQWSeekNruBa6txzIDmCTvX9XU8FLtdujoRBn2IiARHoU_-KlvSmZVfE3sG1FlJ0MvOI2oqQFBUFFIKSS2NmHdFa1H9iP87hALzZErK7I3d0aEdrxecM5MzY53bMxdWSgBLjeZfnCufi2Ii9MTGMOtlcqNXzbUWQ7hWv9rg')", "backgroundSize": "cover"}}
-                          ></div>
-                          <span className="text-sm font-medium">
-                            Jordan Lee
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm">Technology</td>
-                      <td className="p-4 text-center">
-                        <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-primary">
-                          <span className="inline-block h-3.5 w-3.5 translate-x-5 transform rounded-full bg-white transition"></span>
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-                          Published
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm font-medium text-right">
-                        12.4k
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-all"
-                            title="Edit"
+                    {posts?.map((post) => (
+                      <tr
+                        key={post.id}
+                        className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group"
+                      >
+                        <td className="p-4">
+                          <input
+                            className="rounded border-slate-300 text-primary focus:ring-primary"
+                            type="checkbox"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <a
+                            className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
+                            href={`/admin/posts/${post.id}`}
                           >
-                            <span className="material-symbols-outlined text-[20px]">
-                              edit
+                            {post.title}
+                          </a>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {new Date(post.created_at).toLocaleDateString()}
+                          </p>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-6 h-6 rounded-full bg-slate-200"
+                              data-alt="Author avatar"
+                              style={{
+                                backgroundImage:
+                                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDKunYtTLqhGQwKdWvnxOjPz28HlBRm33ozYi_CaIwq00ZvVu4z3psbXcGHbPOmHUvazJNxkyXetGzEdb2rX5n2LXAMQrp5h8y9OCHRxQWSeekNruBa6txzIDmCTvX9XU8FLtdujoRBn2IiARHoU_-KlvSmZVfE3sG1FlJ0MvOI2oqQFBUFFIKSS2NmHdFa1H9iP87hALzZErK7I3d0aEdrxecM5MzY53bMxdWSgBLjeZfnCufi2Ii9MTGMOtlcqNXzbUWQ7hWv9rg')",
+                                backgroundSize: "cover",
+                              }}
+                            ></div>
+                            <span className="text-sm font-medium">
+                              Jordan Lee
                             </span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm">Technology</td>
+                        <td className="p-4 text-center">
+                          <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-primary">
+                            <span className="inline-block h-3.5 w-3.5 translate-x-5 transform rounded-full bg-white transition"></span>
                           </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
-                            title="Preview"
-                          >
-                            <span className="material-symbols-outlined text-[20px]">
-                              visibility
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
-                            title="Delete"
-                          >
-                            <span className="material-symbols-outlined text-[20px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 2 --> */}
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-slate-300 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <a
-                          className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
-                          href="#"
-                        >
-                          10 Remote Work Productivity Hacks for 2024
-                        </a>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Created yesterday
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-6 h-6 rounded-full bg-slate-200"
-                            data-alt="Author avatar"
-                            style={{ "backgroundImage": "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBT6macEywkSQhGap9PpFVef4pCxRE5Lmfhj0z5bONeAmQ5WVifeXhjV636rw3oRINQjcfx_ZQ_7ktAMDbmkwScbOZdimvdVhtlWVWHudeK5xhniFPkXldL_VPc5oXF70jagGvjjPYMytNMXFHm0-hqd6par8KwQYG5Fb5OvTsS827l6As6CHq4_FXRkeEWYxfDLa8gM64tLnUt7_MMlJ8mDWxSCWY6vdLjeeS7nHaUG0W-R8slfKuGDEHzzq0qJAarCr-Mq1aDhxo')", "backgroundSize": "cover" }}
-                          ></div>
-                          <span className="text-sm font-medium">
-                            Sarah Jenkins
+                        </td>
+                        <td className="p-4">
+                          <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                            {post.status}
                           </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm">Lifestyle</td>
-                      <td className="p-4 text-center">
-                        <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 dark:bg-slate-700">
-                          <span className="inline-block h-3.5 w-3.5 translate-x-1 transform rounded-full bg-white transition"></span>
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400">
-                          Draft
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm font-medium text-right text-slate-400">
-                        —
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              visibility
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 3 --> */}
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-slate-300 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <a
-                          className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
-                          href="#"
+                        </td>
+                        <td className="p-4 text-sm font-medium text-right">
+                          12.4k
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-center gap-1">
+                            {canModifyPost(post.author_id) ? (
+                              <>
+                                <Link
+                                  href={`/admin/posts/${post.id}/edit-post`}
+                                  className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-all"
+                                  title="Edit"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]">
+                                    edit
+                                  </span>
+                                </Link>
+                                <button
+                                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
+                                  title="Preview"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]">
+                                    visibility
+                                  </span>
+                                </button>
+                                <Link
+                                  href={`/admin/posts/${post.id}/delete`}
+                                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                                  title="Delete"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]">
+                                    delete
+                                  </span>
+                                </Link>
+                              </>
+                            ) : (
+                              <span className="text-xs text-slate-400 italic">
+                                Read only
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {posts?.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="p-6 text-center text-gray-500"
                         >
-                          Sustainable Fashion: Why it Matters More Than Ever
-                        </a>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Scheduled for Oct 24, 2023
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-6 h-6 rounded-full bg-slate-200"
-                            data-alt="Author avatar"
-                            style={{"backgroundImage": "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBIlXikfEHk73t_B1wCFRRjbY5YIXYn2gYSM8JKDw-Tvv-iA8IS8rVFvvoqhhT4OLcLv4lJBBBmsj9fKtSJI5Q3eJecSQy-KX_F7_4V2LyQL_RMqYyVcPcP92FXB96V_78pQQOQoJ6WqR2ssiLtkrHDzzIbb2BN0seO2i_6PKlaXqFJpr6oqnUKr1EZMzzgzNBfq7GiRDc58zvgObzFbN9p9ONo3Mmng6vlibMXOgILfTRk7GDDuKZxjwoSNj8v3GJHLt1lRLZTA58')", "backgroundSize": "cover"}}
-                          ></div>
-                          <span className="text-sm font-medium">Mike Chen</span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm">Business</td>
-                      <td className="p-4 text-center">
-                        <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 dark:bg-slate-700">
-                          <span className="inline-block h-3.5 w-3.5 translate-x-1 transform rounded-full bg-white transition"></span>
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
-                          Scheduled
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm font-medium text-right text-slate-400">
-                        —
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              visibility
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 4 --> */}
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-slate-300 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <a
-                          className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
-                          href="#"
-                        >
-                          Exploring the Hidden Gems of Scandinavia
-                        </a>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Published 3 days ago
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-6 h-6 rounded-full bg-slate-200"
-                            data-alt="Author avatar"
-                            style={{"backgroundImage": "url('https://lh3.googleusercontent.com/aida-public/AB6AXuChXLfp6wuxM9i5auSQcmAMFxYHyGe1xC-y5xvBns1ujKoNR_HDQ62x-1dsS_Dpn7EZyjP13PZNrc1Zel9JTd87EesKQS04UNNP3m7nK0cKXxrVIOUhKAEEYA1O9YFGy7TdUIvIhfuFSuUQm_YnvVoqEAr5xTssl_sr1mO8gmKTGmhztl6Y9kD_I6E0TQWQaMQgWTEnf7giAxxUtprd1spOmqdGieZEr-LgFb3QelsLJuEultX8vKT-x4v0HWhn52DiM0hXHH9oN-0')", "backgroundSize": "cover"}}
-                          ></div>
-                          <span className="text-sm font-medium">
-                            Elena Rossi
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm">Lifestyle</td>
-                      <td className="p-4 text-center">
-                        <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-primary">
-                          <span className="inline-block h-3.5 w-3.5 translate-x-5 transform rounded-full bg-white transition"></span>
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-                          Published
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm font-medium text-right">
-                        8.9k
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              visibility
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 5 --> */}
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-slate-300 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <a
-                          className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
-                          href="#"
-                        >
-                          The Rise of Digital Nomads: A Global Shift
-                        </a>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Published 1 week ago
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-6 h-6 rounded-full bg-slate-200"
-                            data-alt="Author avatar"
-                            style={{"backgroundImage": "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBg7Y9cZvCXqWDyCsSbFxzcUQgf4fovcTEi7v9OlP_MFQBs4wSWfQvJHM9kBQw-ifmCv0mZPS7yE5pBgGz0XlbGXF38qKMAjE0VvrwP7_l02fABcw0anH2U_thlZ_qI5ejXLntr2xsO_KdgGW0SlTd-v-I0otrlBJI_DrcbapH8u_LfokTL24LgeH4P5zyZYaxWdng-RlCP4lblEq_dLfDaZsViWXD7axA4MNRNHcSBEUa98P-_Xtw07feBMzTyQk3fgsWKsFqGZiY')", "backgroundSize": "cover"}}
-                          ></div>
-                          <span className="text-sm font-medium">
-                            David Stark
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm">Business</td>
-                      <td className="p-4 text-center">
-                        <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 dark:bg-slate-700">
-                          <span className="inline-block h-3.5 w-3.5 translate-x-1 transform rounded-full bg-white transition"></span>
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-                          Published
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm font-medium text-right">
-                        25.1k
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              visibility
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-                            <span className="material-symbols-outlined text-[20px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                          No posts found
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

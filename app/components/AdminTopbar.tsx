@@ -1,4 +1,4 @@
-import React from "react";
+import Link from "next/link";
 
 interface AdminTopbarProps {
   page: string;
@@ -8,15 +8,16 @@ export default function AdminTopbar({ page }: AdminTopbarProps) {
   return (
     <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <nav className="flex text-sm font-medium text-slate-500">
-          <span>Admin</span>
+        <nav className="flex text-sm font-medium text-slate-500 ml-8 md:ml-0">
+          <Link href="/admin">Admin</Link>
           <span className="mx-2 text-slate-300">/</span>
           <span className="text-slate-900 dark:text-slate-100 font-bold">
             {page}
           </span>
         </nav>
       </div>
-      <div className="flex items-center gap-6">
+      {/* Hide on mobile, show on md+ screens */}
+      <div className="hidden md:flex items-center gap-6">
         <div className="relative w-64">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             search

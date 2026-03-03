@@ -2,14 +2,14 @@ export const dynamic = "force-dynamic";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { createServerSupabase } from "@/lib/supabase/publishServer";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 
 export default async function AdminLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createServerSupabase();
+  const supabase = await createReadOnlySupabase();
 
   // 1️⃣ Auth check
   const {

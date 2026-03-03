@@ -1,6 +1,6 @@
+import AddCategoryDrawerClientBridge from "@/app/components/AddCategoryDrawerClientBridge";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
-import React from "react";
 
 export default function AdminCategories() {
   return (
@@ -17,20 +17,7 @@ export default function AdminCategories() {
             <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-6xl mx-auto space-y-6">
                 {/* <!-- Page Title & CTA --> */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                      Categories
-                    </h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">
-                      Manage and organize your blog post groupings.
-                    </p>
-                  </div>
-                  <button className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-bold hover:shadow-lg hover:shadow-primary/30 transition-all text-sm">
-                    <span className="material-symbols-outlined">add</span>
-                    Add New Category
-                  </button>
-                </div>
+                 <AddCategoryDrawerClientBridge />
                 {/* <!-- Filter Bar --> */}
                 <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center">
                   <div className="relative flex-1 min-w-60">
@@ -298,93 +285,6 @@ export default function AdminCategories() {
                       </button>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            {/* <!-- Add Category Side Drawer (Visible for demo) --> */}
-            <div className="absolute inset-y-0 z-50 right-0 w-full max-w-sm bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl transform translate-x-0 transition-transform">
-              <div className="h-full flex flex-col">
-                <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-lg">Add New Category</h3>
-                    <p className="text-xs text-slate-500">
-                      Create a new organizational group
-                    </p>
-                  </div>
-                  <button className="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 transition-colors hover:text-red-500">
-                    <span className="material-symbols-outlined text-lg">
-                      close
-                    </span>
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Category Name
-                    </label>
-                    <input
-                      className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                      placeholder="e.g. Travel"
-                      type="text"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Slug
-                    </label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs">
-                        blog.com/
-                      </span>
-                      <input
-                        className="flex-1 min-w-0 px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-r-lg text-sm focus:ring-primary focus:border-primary"
-                        placeholder="travel"
-                        type="text"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Parent Category
-                    </label>
-                    <select className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary">
-                      <option>None (Main Category)</option>
-                      <option>Technology</option>
-                      <option>Design Trends</option>
-                      <option>Personal Finance</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Description
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                      placeholder="Briefly describe what this category covers..."
-                      rows={4}
-                    ></textarea>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/10">
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 dark:text-slate-50">
-                        Featured Category
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Show on homepage sidebar
-                      </p>
-                    </div>
-                    <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 dark:bg-slate-700">
-                      <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1"></span>
-                    </button>
-                  </div>
-                </div>
-                <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
-                  <button className="flex-1 px-4 py-2.5 bg-primary text-white font-bold rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Save Category
-                  </button>
-                  <button className="px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-bold rounded-lg text-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors">
-                    Cancel
-                  </button>
                 </div>
               </div>
             </div>

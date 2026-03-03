@@ -29,24 +29,27 @@ export default function AdminSidebar() {
           ></div>
           {/* Sidebar Drawer */}
           <aside className="fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300">
-              <Link href="/" className="flex justify-between items-center p-2 mb-5">
+            <div className="flex justify-between items-center p-2 mb-5">
+              <Link href="/">
                 <img
                   className="h-12 w-auto"
                   alt="NewMusk Blogs logo"
                   src="/images/newmusk.png"
                   style={{ objectFit: "contain" }}
                 />
-                <button
-                  className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400"
-                  onClick={handleClose}
-                  aria-label="Close admin sidebar"
-                >
-                  <span className="material-symbols-outlined">close</span>
-                </button>
               </Link>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-widest text-center mb-2">
-                Blogs Admin
-              </p>
+
+              <button
+                className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400"
+                onClick={handleClose}
+                aria-label="Close admin sidebar"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-widest text-center mb-2">
+              Blogs Admin
+            </p>
             <nav className="flex-1 px-4 pb-4 space-y-1">
               <a
                 className="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-semibold transition-colors"
@@ -107,6 +110,20 @@ export default function AdminSidebar() {
                   <div className="absolute left-1 top-1 bg-white w-2 h-2 rounded-full dark:translate-x-4 transition-transform"></div>
                 </div>
               </button>
+              <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-800">
+          <div className="text-right">
+            <p className="text-sm font-bold">Elon Jr.</p>
+            <p className="text-xs text-primary font-semibold">Admin Role</p>
+          </div>
+          <div className="h-10 w-10 rounded-full bg-slate-200 border-2 border-white dark:border-slate-800 overflow-hidden shadow-sm">
+            <img
+              alt="User Profile"
+              className="w-full h-full object-cover"
+              data-alt="Portrait of a professional administrator"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdHTB7LB5haZ0ESOAKwtBfgPDpa6jKdP7fOaMdrXwkeRVvm3J8ldShqm3Qmx11LMhL7lbizY2_ed4rENEpPUvhGTsZbpgH2zVGa8LAccxsg7201FNrjuNuIQ-f33adUt23nh5-LgGuQ5JCrwOem-9vLeSm_Fs5GaGpu90rtk-A9OHZKdn4yMH11KyaR9SJ0TDOnnHbDRnYoSN6ov76MLIE64OFJgVRYsl71QfmrNPqjnyEkbxOuxLZJkSNen9AZk1pM1PP50uWCvY"
+            />
+          </div>
+        </div>
             </div>
           </aside>
         </>
