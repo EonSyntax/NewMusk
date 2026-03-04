@@ -2,12 +2,16 @@
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
+import { redirect } from "next/navigation";
 
 export async function createPost(formData: FormData) {
   const supabase = await createReadOnlySupabase();
 
   const title = formData.get("title") as string;
+  const cover_image = formData.get("cover_image") as string;
+  const description = formData.get("description") as string;
   const content = formData.get("content") as string;
+  const status = formData.get("status") as string;
   const categoryIds = formData.getAll("categories") as string[];
 
   if (!title || !content) {
@@ -26,10 +30,12 @@ export async function createPost(formData: FormData) {
     .from("posts")
     .insert({
       title,
+      cover_image,
+      description,
       slug,
       content,
       author_id: user.id,
-      status: "draft",
+      status,
     })
     .select()
     .single();
@@ -64,6 +70,8 @@ export async function updatePost(formData: FormData) {
 
   const id = formData.get("id") as string;
   const title = formData.get("title") as string;
+  const cover_image = formData.get("cover_image") as string;
+  const description = formData.get("description") as string;
   const content = formData.get("content") as string;
   const status = formData.get("status") as string;
   const categoryIds = formData.getAll("categories") as string[];
@@ -81,6 +89,8 @@ export async function updatePost(formData: FormData) {
     .from("posts")
     .update({
       title,
+      cover_image,
+      description,
       slug,
       content,
       status,
@@ -110,5 +120,5 @@ export async function updatePost(formData: FormData) {
     if (catError) throw catError;
   }
 
-  return id;
+  redirect("/admin/posts");
 }
