@@ -40,12 +40,12 @@ export default async function AdminCategories() {
           {/* <!-- Main Content --> */}
           <main className="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark relative">
             {/* <!-- Header --> */}
-           <AdminTopbar page="Categories" />
+            <AdminTopbar page="Categories" />
             {/* <!-- Content Area --> */}
             <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-6xl mx-auto space-y-6">
                 {/* <!-- Page Title & CTA --> */}
-                 <AddCategoryDrawerClientBridge />
+                <AddCategoryDrawerClientBridge />
                 {/* <!-- Filter Bar --> */}
                 <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center">
                   <div className="relative flex-1 min-w-60">
@@ -74,8 +74,8 @@ export default async function AdminCategories() {
                   </div>
                 </div>
                 {/* <!-- Data Table --> */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto shadow-sm">
+                  <table className="min-w-max w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                         <th className="px-6 py-4 w-12">
@@ -93,53 +93,58 @@ export default async function AdminCategories() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {categories?.map((category) => (
-                      <tr key={category.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                        <td className="px-6 py-4">
-                          <input
-                            className="rounded border-slate-300 text-primary focus:ring-primary"
-                            type="checkbox"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="size-8 rounded bg-primary/10 flex items-center justify-center text-primary">
-                              <span className="material-symbols-outlined text-base">
-                                rocket_launch
+                        <tr
+                          key={category.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
+                        >
+                          <td className="px-6 py-4">
+                            <input
+                              className="rounded border-slate-300 text-primary focus:ring-primary"
+                              type="checkbox"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="size-8 rounded bg-primary/10 flex items-center justify-center text-primary">
+                                <img
+                                  src="/android-chrome-192x192.png"
+                                  alt={category.name}
+                                  className="w-4 h-4 rounded-full object-contain"
+                                />
+                              </div>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                {category.name}
                               </span>
                             </div>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">
-                              {category.name}
+                          </td>
+                          <td className="px-6 py-4">
+                            <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
+                              {category.slug}
+                            </code>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                              <PostCountBadge categoryId={category.id} />
                             </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
-                            {category.slug}
-                          </code>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                           <PostCountBadge categoryId={category.id} />
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-primary">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 text-right space-x-2">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              delete
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-primary">
+                              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
+                            </button>
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-2">
+                            <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+                              <span className="material-symbols-outlined text-lg">
+                                edit
+                              </span>
+                            </button>
+                            <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded transition-colors">
+                              <span className="material-symbols-outlined text-lg">
+                                delete
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
                       ))}
                       {/* <!-- Row 2 --> */}
                       <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">

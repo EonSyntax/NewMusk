@@ -30,7 +30,7 @@ export default function RichTextEditor({ content, onChange }: Props) {
 
   return (
     <>
-      <div className="sticky top-4 mb-8 p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-1 z-20">
+      <div className="sticky top-4 mb-8 p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-1 z-20 overflow-x-auto flex-nowrap scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -65,6 +65,7 @@ export default function RichTextEditor({ content, onChange }: Props) {
           <span className="material-symbols-outlined">format_h2</span>
         </button>
         <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleLink().run()}
@@ -114,7 +115,7 @@ export default function RichTextEditor({ content, onChange }: Props) {
         >
           <span className="material-symbols-outlined">code</span>
         </button>
-        <div className="flex-1"></div>
+        <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -126,8 +127,14 @@ export default function RichTextEditor({ content, onChange }: Props) {
         </button>
       </div>
       {/* <!-- Content Area --> */}
-      <div className="editor-content prose dark:prose-invert max-w-none text-lg leading-relaxed text-slate-700 dark:text-slate-300 min-h-125">
-        <EditorContent editor={editor} />
+      <div
+        className="editor-content prose dark:prose-invert max-w-none text-lg leading-relaxed text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-h-[20em] max-h-[40em] overflow-y-auto p-4"
+        style={{ minHeight: "20em", maxHeight: "40em" }}
+      >
+        <EditorContent
+          editor={editor}
+          className="h-full border-none caret-accent dark:caret-slate-100"
+        />
       </div>
     </>
   );
