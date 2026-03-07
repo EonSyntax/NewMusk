@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
-
-type CategoryParams = {
-  category: keyof typeof categories;
-};
+import { supabaseAdmin } from "@/lib/supabase/server";
+import Link from "next/link";
 
 const categories = {
   health: {
@@ -35,6 +33,10 @@ const categories = {
   },
 };
 
+type CategoryParams = {
+  category: keyof typeof categories;
+};
+
 export default async function CategoryPage({
   params,
 }: {
@@ -47,6 +49,57 @@ export default async function CategoryPage({
   if (!categoryData) {
     notFound();
   }
+
+  const { data: posts, error } = await supabaseAdmin
+    .from("post_categories")
+    .select(
+      `
+    posts (
+      id,
+      title,
+      slug,
+      description,
+      cover_image,
+      created_at,
+      status,
+      author_id,
+      profiles:author_id!inner (
+        full_name
+      )
+    ),
+    categories!inner (
+      name,
+      slug
+    )
+  `,
+    )
+    .eq("categories.slug", category)
+    .eq("posts.status", "published")
+    .order("created_at", { ascending: false });
+
+  const postsList =
+    (posts
+      ?.map((item: any) => {
+        const post = item.posts;
+        if (!post) return null;
+        // Attach full_name from joined profile, handle null
+        return {
+          ...post,
+          author_name:
+            post.profiles && post.profiles.full_name
+              ? post.profiles.full_name
+              : "Unknown Author",
+        };
+      })
+      .filter(Boolean) as any[]) || [];
+  const latestPost = postsList?.[0] ?? null;
+
+  if (error) {
+    console.error(error);
+  }
+
+  // console.log(posts); for testing the table relationship and data fetching
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* <!-- Category Header & Featured --> */}
@@ -70,39 +123,44 @@ export default async function CategoryPage({
           </div>
         </div>
 
-        {/* <!-- Featured Card --> */}
-        <div className="relative group overflow-hidden rounded-xl bg-slate-900 aspect-21/9">
-          <img
-            alt="Neuralink"
-            className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
-            data-alt="Abstract neural network visual representing high technology"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_JOcprxor68equdpDeiMdXlRr2S-gRMXIXy2twXsUXPL4foT0mcvjLoBsq2-FswDbYSR515KJn2p24YrtrDXOKUP-59vB5KmdwT2f3UVplP-rS6eB8-ozGTZzetoU-FQIa23s9vzrwKeoftmKJ5-AnsTDAe-51qOAteRF3EIQEc4M5OUkAgT8-euaO2iK1V5KErkwVNYIUCuOJq1OU9EsEVgufGBpD5gdJrxTW6mDxM3eEnBlPgbjXO4cPATj-g_1hnW3wGJyHR0"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-3/4">
-            <span className="inline-block px-3 py-1 bg-primary text-white text-xs font-bold rounded mb-4 uppercase tracking-widest">
-              Featured Story
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-              The Future of Neuralink: A Deep Dive into Brain-Computer
-              Interfaces
-            </h2>
-            <p className="text-slate-200 text-lg mb-6 line-clamp-2 md:line-clamp-none">
-              A comprehensive look at how brain-computer interfaces are evolving
-              and what it means for the next phase of human evolution and
-              healthcare innovation.
-            </p>
-            <div className="flex items-center gap-4">
-              <button className="bg-primary hover:bg-opacity-90 text-white px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2">
-                Read Full Story
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
-              <span className="text-slate-300 text-sm">
-                12 min read • May 24, 2024
+        {/* <!-- Hero Card --> */}
+        {latestPost && (
+          <div className="relative group overflow-hidden rounded-xl bg-slate-900 aspect-21/9">
+            <img
+              alt={latestPost.title}
+              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
+              data-alt="Abstract neural network visual representing high technology"
+              src={latestPost.cover_image || "/placeholder-cover.jpg"}
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-3/4">
+              <span className="inline-block px-3 py-1 bg-primary text-white text-xs font-bold rounded mb-4 uppercase tracking-widest">
+                Latest {categoryData.title}
               </span>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                {latestPost.title}
+              </h2>
+              <p className="text-slate-200 text-lg mb-6 line-clamp-2 md:line-clamp-none">
+                {latestPost.description}
+              </p>
+              <div className="flex items-center gap-4">
+                <Link
+                  href={`/posts/${latestPost.slug}`}
+                  className="bg-primary hover:bg-opacity-90 text-white px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2"
+                >
+                  Read Full Story
+                  <span className="material-symbols-outlined">
+                    arrow_forward
+                  </span>
+                </Link>
+                <span className="text-slate-300 text-sm">
+                  12 min read •{" "}
+                  {new Date(latestPost.created_at).toLocaleDateString()}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
       <div className="flex flex-col lg:flex-row gap-12">
         {/* <!-- Main Content Area --> */}
@@ -194,200 +252,42 @@ export default async function CategoryPage({
                 <span className="text-xs text-slate-400">May 22, 2024</span>
               </div>
             </article>
-            {/* <!-- Card 2 --> */}
-            <article className="group">
-              <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
-                <img
-                  alt="Article Image"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  data-alt="Rocket launch into night sky"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRLpycQK7lzZMW0qk1sJD_IDE0Jk1-olyAlD2VbanN-kIybIbuy-7bs9eIjZxaBdjqhNvbfzIokkihJcxbEdjmalB8z68UsnjfK_wG4TKYAjke3KoVc8u2-8Ji9GmeI8B46VLDMrrp8Ha1MtYhsda-FILkYQSXoVok40N1ZDzSWiILI4G3pBCFs-7YumJyygT5MfdyYPJfrVHNfwJq3T52Dnr2NXkDy9bCi1vxOGGAxsnVYVUwgSmsEdfuLDiqTo6mBSe3OMmBT9o"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-white/90 backdrop-blur text-slate-900 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
-                    Space
-                  </span>
+            {postsList.map((post) => (
+              <article key={post.id} className="group">
+                <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
+                  <img
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    src={post.cover_image || "/placeholder-cover.jpg"}
+                  />
                 </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
-                Starship Flight 5: Setting the Stage for Mars Colonization
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                SpaceX's latest test flight proves that rapid reusability is no
-                longer a dream but a rapidly approaching reality for planetary
-                exploration.
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                    <img
-                      alt="Author"
-                      data-alt="Female author portrait"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGHWQJGYRuYkgsXYUT5nLjP-nzsKLwWkEoFzXWgKqyjbTBFI9e6yEMdXTdFa_TTQRDONbHc8DpAZhWL624o8FJ8MqANykJe3JqO0t-vBgSWUL7UGGY4UwTSxfrIGk-NnpQ4LVs7fLZ40oF8D4w2-qjtGw0SRt0HF3HFKLInxeTNUpslV7HoejjgF_L9wE9n1hpyjDCAV0cb9w-X_H3BY4bjYqWBWf58nEkHDXLdKoi7UQ6e6f1cYfDGsXkVcNum8SXFqL-JeD9g6k"
-                    />
+                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
+                  {post.title}
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
+                  {post.description}
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
+                      <img
+                        alt="Author"
+                        data-alt="Male author portrait"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSSJII3nKUXqE7J9_XGzHF8lgIcQspfwsUUnQQ67bdiBQtWJoR5Zh3ji2KqRCL7RV43wISHvWzgncmgASkgi9qVXEt9sgiVLEtNTPGpatVBUEYwbo3WBBAsXeNZ18l80fqrdjB6Z0R9YG3V9Si99DluaAFYsHrXWC-l949P7soKKPEkmqnBwoxwk4w-YrGWILS9YLFMt0u9SiEytr4K1mUTOOdF-QokDSd4OZWFHrQKAOHqOIpZ1TvOp0hJswkbg8_TYcKkqCf8js"
+                      />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      {post.author_name}
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Elena Vance
+                  <span className="text-xs text-slate-400">
+                    {post.created_at
+                      ? new Date(post.created_at).toLocaleDateString()
+                      : ""}
                   </span>
                 </div>
-                <span className="text-xs text-slate-400">May 20, 2024</span>
-              </div>
-            </article>
-            {/* <!-- Card 3 --> */}
-            <article className="group">
-              <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
-                <img
-                  alt="Article Image"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  data-alt="Electric car charging station detail"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhh_bMQyBt0WlJ762ONJ5oJAyuYHP1qlA3Ny9HN94VuMEljf2kwCYnNyeS2mG5UZMNMtehox_JeD0QiFbqc0InDvT0r2x8PiQnEJMLH95DhQJ5CKSdxMEAQwfB5qHeKDhIimEGqqDpAjUnb7v-Ib16d-XzXh9-UTgpMAf2HR25BnObKS18-9AOpvuAerS2T17frdlu1Oai6r2Cky9nQhxZzvsAXSCScxulxOB7kUPRSd3gJHc88l_V8gRSZpFHkTFG2vh6JsK8TNE"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-white/90 backdrop-blur text-slate-900 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
-                    Tesla
-                  </span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
-                Solid-State Batteries: The Holy Grail of EV Longevity?
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                New breakthroughs in solid-state chemistry could triple the
-                range of current EVs and reduce charging times to under five
-                minutes.
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                    <img
-                      alt="Author"
-                      data-alt="Male author portrait"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdcOf_jt288F3JgiWF9nABThm_k3viRfPVPzwNx2yuKmCrrbJtDl_5doPlwW0CqTUFwSM_Lbbb4V150Hu7yRGO3HM3Hg233LqoMxxAC-QTK5y9aAibaIl5I2htDkKsT4LVbvyvONJqLVTG7G8Ts8kuUUK4XffmpzAM95S-DJ8L1HyQoe60OflDbMvzdSPA9I130G281P58UtcnNtppHe63kbPxqUTKPdmmrliIZQac_sw3OSsB5Q5JOXA0cImD6bQGHehIpAopgj8"
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    David Kim
-                  </span>
-                </div>
-                <span className="text-xs text-slate-400">May 18, 2024</span>
-              </div>
-            </article>
-            {/* <!-- Card 4 --> */}
-            <article className="group">
-              <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
-                <img
-                  alt="Article Image"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  data-alt="Digital representation of blockchain data"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7H4502nLFFGiSfoiagRZnGQehgJNhDTTVDj-RDVH7ruMt44eQzUemaGyLIVc1NJinF4RWkn8_Y8FP0OJBY2ymmrjBUfFCQTAU1rjtNJ70E2hfxTiIMXxfyLyzRJuS6AOtJfvJGDPnBkbbnaAYfSA_MDWVwae9MGR3YjMSq6EkJdIw1bvBdkCauRDELeCuLYW_jt4wXtNe2Mv_pAG9PCuLEmJl-5SWmolCkey6auroNKJyK5XFyH6fCduFObXN2yrEefp9OPwOqek"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-white/90 backdrop-blur text-slate-900 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
-                    Web3
-                  </span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
-                The Decentralized Web: Beyond the Crypto Hype
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                How decentralized protocols are quietly building a more
-                resilient internet, focusing on data privacy and user ownership.
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                    <img
-                      alt="Author"
-                      data-alt="Female author portrait"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDas-dlOLgpO7Ley3DVGRPdu_Nb89B-e2-iphEop-PjvmYh8C7kaYMrAfEeKbo3LvMAqtuAPDxiOmPgHtBXoyTAifBboSLImV07On5e1CJS5XUvF23gqz2MSHzuyhSuL4jcwWtqsDIzYkA6mxTfJT_auOWnawYZgBP1ep8H-2Xgxzbw5QLDhkndM4nBIAD7u98ZevRET2ZvdvH3BYYAFI1JKceKMSQ0psuyRcXKK58WXRstmmu-FSU10mokTLt9sl_LnlMlXogkSQ"
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Sarah Chen
-                  </span>
-                </div>
-                <span className="text-xs text-slate-400">May 15, 2024</span>
-              </div>
-            </article>
-            {/* <!-- Card 5 --> */}
-            <article className="group">
-              <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
-                <img
-                  alt="Article Image"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  data-alt="High tech hardware circuit board close up"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEPEAlsSGryoqMxPSQnavxONWnGpJOXx3uIUwzVq1y2-K6fYoo-oSSHeQl1EgD9BJdmlxZQt6mDiMW8_7sK4xjePV_EPCLhDKJ3GYMWqohjO_CPdjo0mrQTgA_rBDhASPVlE-ePo4pjPw_Jud2PmCv_CIHvQ-ulZPUPevuDsV5H3KFWPuGykAXGWX_JVzJm2Vv8vwg0CE2t6dVMHHN4KU28M1KctUKELdvUA4zoM4BpC2hLfCl5_5PsbET0QIFXOlfr4vDrXsFKL0"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-white/90 backdrop-blur text-slate-900 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
-                    AI
-                  </span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
-                GPT-5: What to Expect from the Next Frontier of LLMs
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                The AI community is buzzing with rumors about the next major
-                release from OpenAI. Here is everything we know so far about the
-                capabilities and training.
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                    <img
-                      alt="Author"
-                      data-alt="Male author portrait"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSSJII3nKUXqE7J9_XGzHF8lgIcQspfwsUUnQQ67bdiBQtWJoR5Zh3ji2KqRCL7RV43wISHvWzgncmgASkgi9qVXEt9sgiVLEtNTPGpatVBUEYwbo3WBBAsXeNZ18l80fqrdjB6Z0R9YG3V9Si99DluaAFYsHrXWC-l949P7soKKPEkmqnBwoxwk4w-YrGWILS9YLFMt0u9SiEytr4K1mUTOOdF-QokDSd4OZWFHrQKAOHqOIpZ1TvOp0hJswkbg8_TYcKkqCf8js"
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Marcus Thorne
-                  </span>
-                </div>
-                <span className="text-xs text-slate-400">May 22, 2024</span>
-              </div>
-            </article>
-            {/* <!-- Card 6 --> */}
-            <article className="group">
-              <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
-                <img
-                  alt="Article Image"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  data-alt="Rocket launch into night sky"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRLpycQK7lzZMW0qk1sJD_IDE0Jk1-olyAlD2VbanN-kIybIbuy-7bs9eIjZxaBdjqhNvbfzIokkihJcxbEdjmalB8z68UsnjfK_wG4TKYAjke3KoVc8u2-8Ji9GmeI8B46VLDMrrp8Ha1MtYhsda-FILkYQSXoVok40N1ZDzSWiILI4G3pBCFs-7YumJyygT5MfdyYPJfrVHNfwJq3T52Dnr2NXkDy9bCi1vxOGGAxsnVYVUwgSmsEdfuLDiqTo6mBSe3OMmBT9o"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-white/90 backdrop-blur text-slate-900 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
-                    Space
-                  </span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
-                Starship Flight 5: Setting the Stage for Mars Colonization
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                SpaceX's latest test flight proves that rapid reusability is no
-                longer a dream but a rapidly approaching reality for planetary
-                exploration.
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
-                    <img
-                      alt="Author"
-                      data-alt="Female author portrait"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGHWQJGYRuYkgsXYUT5nLjP-nzsKLwWkEoFzXWgKqyjbTBFI9e6yEMdXTdFa_TTQRDONbHc8DpAZhWL624o8FJ8MqANykJe3JqO0t-vBgSWUL7UGGY4UwTSxfrIGk-NnpQ4LVs7fLZ40oF8D4w2-qjtGw0SRt0HF3HFKLInxeTNUpslV7HoejjgF_L9wE9n1hpyjDCAV0cb9w-X_H3BY4bjYqWBWf58nEkHDXLdKoi7UQ6e6f1cYfDGsXkVcNum8SXFqL-JeD9g6k"
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Elena Vance
-                  </span>
-                </div>
-                <span className="text-xs text-slate-400">May 20, 2024</span>
-              </div>
-            </article>
+              </article>
+            ))}
           </div>
           {/* <!-- Pagination --> */}
           <div className="flex items-center justify-center gap-2 mt-16 border-t border-slate-200 dark:border-slate-800 pt-8">
@@ -429,7 +329,8 @@ export default async function CategoryPage({
                 </span>
                 <div>
                   <h5 className="font-bold text-sm group-hover:text-primary transition-colors leading-snug mb-1">
-                    Optimus Gen 2: The End of Physical Labor?
+                    {latestPost?.title ||
+                      "Optimus Gen 2: The End of Physical Labor?"}
                   </h5>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
                     Robotics • 5m Read
@@ -442,7 +343,8 @@ export default async function CategoryPage({
                 </span>
                 <div>
                   <h5 className="font-bold text-sm group-hover:text-primary transition-colors leading-snug mb-1">
-                    Solar Roof V3: Efficiency Gains Explained
+                    {postsList?.[1]?.title ||
+                      "Solar Roof V3: Efficiency Gains Explained"}
                   </h5>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
                     Energy • 8m Read
@@ -455,7 +357,8 @@ export default async function CategoryPage({
                 </span>
                 <div>
                   <h5 className="font-bold text-sm group-hover:text-primary transition-colors leading-snug mb-1">
-                    Mars Habitat Prototypes: First Look
+                    {postsList?.[2]?.title ||
+                      "Mars Habitat Prototypes: First Look"}
                   </h5>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
                     Space • 12m Read

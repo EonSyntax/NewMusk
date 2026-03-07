@@ -1,8 +1,10 @@
 "use client";
-
+import TextAlign from "@tiptap/extension-text-align";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
+import ResizeImage from "tiptap-extension-resize-image";
+import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
 
 interface Props {
@@ -12,7 +14,19 @@ interface Props {
 
 export default function RichTextEditor({ content, onChange }: Props) {
   const editor = useEditor({
-    extensions: [StarterKit, Image],
+    extensions: [
+      StarterKit,
+      ResizeImage,
+      Link.configure({
+        openOnClick: false,
+      }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
+      Placeholder.configure({
+        placeholder: "Start writing your post....",
+      }),
+    ],
     content: content || "",
     immediatelyRender: false,
     onUpdate({ editor }) {
@@ -32,48 +46,80 @@ export default function RichTextEditor({ content, onChange }: Props) {
     <>
       <div className="sticky top-4 mb-8 p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-1 z-20 overflow-x-auto flex-nowrap scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
         <button
+          title="Bold"
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300"
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("bold")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">format_bold</span>
         </button>
         <button
+          title="Italic"
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300"
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("italic")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">format_italic</span>
         </button>
         <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
         <button
+          title="Heading 1"
           type="button"
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
           }
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-1"
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("heading", { level: 1 })
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">format_h1</span>
         </button>
         <button
+          title="Heading 2"
           type="button"
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 2 }).run()
           }
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-1"
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("heading", { level: 2 })
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">format_h2</span>
         </button>
         <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
 
         <button
+          title="Link"
           type="button"
-          onClick={() => editor.chain().focus().toggleLink().run()}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300"
+          onClick={() => {
+            const url = prompt("Enter URL");
+
+            if (url) {
+              editor.chain().focus().setLink({ href: url }).run();
+            }
+          }}
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("link")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">link</span>
         </button>
         <button
+          title="Image"
           type="button"
           onClick={async () => {
             const input = document.createElement("input");
@@ -104,36 +150,117 @@ export default function RichTextEditor({ content, onChange }: Props) {
               }
             };
           }}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300"
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("image")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">image</span>
         </button>
         <button
+          title="Code Block"
           type="button"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300"
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("codeBlock")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">code</span>
         </button>
         <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
         <button
+          title="Bullet List"
           type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("bulletList")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
         >
           <span className="material-symbols-outlined">
             format_list_bulleted
           </span>
         </button>
+        <button
+          title="Numbered List"
+          type="button"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={`p-2 rounded-lg text-slate-600 ${
+            editor.isActive("orderedList")
+              ? "bg-slate-200 dark:bg-slate-700"
+              : "hover:bg-slate-100 dark:hover:bg-slate-700"
+          }`}
+        >
+          <span className="material-symbols-outlined">
+            format_list_numbered
+          </span>
+        </button>
+        <div className="relative group">
+          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+            <span className="material-symbols-outlined">
+              format_align_justify
+            </span>
+          </button>
+
+          <div className="absolute hidden group-hover:flex flex-col bg-white dark:bg-slate-800 border rounded-lg shadow-lg top-10 left-0 z-30">
+            <button
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
+              className="p-2 hover:bg-slate-100"
+              title="Align Left"
+            >
+              <span className="material-symbols-outlined">
+                format_align_left
+              </span>
+            </button>
+
+            <button
+              onClick={() =>
+                editor.chain().focus().setTextAlign("center").run()
+              }
+              className="p-2 hover:bg-slate-100"
+              title="Align Center"
+            >
+              <span className="material-symbols-outlined">
+                format_align_center
+              </span>
+            </button>
+
+            <button
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
+              className="p-2 hover:bg-slate-100"
+              title="Align Right"
+            >
+              <span className="material-symbols-outlined">
+                format_align_right
+              </span>
+            </button>
+
+            <button
+              onClick={() =>
+                editor.chain().focus().setTextAlign("justify").run()
+              }
+              className="p-2 hover:bg-slate-100"
+              title="Justify"
+            >
+              <span className="material-symbols-outlined">
+                format_align_justify
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
       {/* <!-- Content Area --> */}
       <div
-        className="editor-content prose dark:prose-invert max-w-none text-lg leading-relaxed text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-h-[20em] max-h-[40em] overflow-y-auto p-4"
+        className="editor-content max-w-none text-lg leading-relaxed text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 min-h-75 max-h-150 overflow-y-auto p-4 focus-within:ring-2 focus-within:ring-blue-500"
         style={{ minHeight: "20em", maxHeight: "40em" }}
       >
         <EditorContent
           editor={editor}
-          className="h-full border-none caret-accent dark:caret-slate-100"
+          className="h-full border-none outline-none [&_p]:outline-none"
         />
       </div>
     </>
