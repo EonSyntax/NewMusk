@@ -145,7 +145,7 @@ export default async function CategoryPage({
               </p>
               <div className="flex items-center gap-4">
                 <Link
-                  href={`/posts/${latestPost.slug}`}
+                  href={`/${category}/${latestPost.slug}`}
                   className="bg-primary hover:bg-opacity-90 text-white px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2"
                 >
                   Read Full Story
@@ -155,7 +155,13 @@ export default async function CategoryPage({
                 </Link>
                 <span className="text-slate-300 text-sm">
                   12 min read •{" "}
-                  {new Date(latestPost.created_at).toLocaleDateString()}
+                  {new Date(
+                    latestPost.updated_at || latestPost.created_at,
+                  ).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </span>
               </div>
             </div>
@@ -254,16 +260,20 @@ export default async function CategoryPage({
             </article>
             {postsList.map((post) => (
               <article key={post.id} className="group">
-                <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
-                  <img
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src={post.cover_image || "/placeholder-cover.jpg"}
-                  />
-                </div>
-                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
-                  {post.title}
-                </h3>
+                <Link href={`/${category}/${post.slug}`} className="block">
+                  <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 dark:bg-slate-800">
+                    <img
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      src={post.cover_image || "/placeholder-cover.jpg"}
+                    />
+                  </div>
+                </Link>
+                <Link href={`/${category}/${post.slug}`} className="block">
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors leading-tight">
+                    {post.title}
+                  </h3>
+                </Link>
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
                   {post.description}
                 </p>

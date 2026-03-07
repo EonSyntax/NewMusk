@@ -1,6 +1,62 @@
+import { notFound } from "next/navigation";
+import { supabaseAdmin } from "@/lib/supabase/server";
 import React from "react";
+import Link from "next/link";
 
-export default function BlogDetails() {
+type Params = {
+  category: string;
+  slug: string;
+};
+
+export default async function BlogDetails({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { category, slug } = await params;
+
+  // console.log("Category:", category);
+  // console.log("Slug:", slug);
+
+ const { data, error } = await supabaseAdmin
+  .from("posts")
+  .select(`
+    id,
+    title,
+    slug,
+    description,
+    content,
+    cover_image,
+    created_at,
+    updated_at,
+    profiles!author_id (
+      full_name
+    ),
+    post_categories!inner (
+      categories!inner (
+        name,
+        slug
+      )
+    )
+  `)
+  .eq("slug", slug)
+  .eq("status", "published")
+  .eq("post_categories.categories.slug", category)
+  .single();
+
+  const post = data
+  ? {
+      ...data,
+      categories: data.post_categories?.map((p: any) => p.categories) || [],
+    }
+  : null;
+
+  // console.log("Post:", post);
+  // console.log("Error:", error);
+
+  if (error || !post) {
+    notFound();
+  }
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -8,29 +64,33 @@ export default function BlogDetails() {
         <article className="lg:col-span-8">
           {/* <!-- Breadcrumbs --> */}
           <nav className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">
-            <a className="hover:text-primary transition-colors" href="#">
+            <Link className="hover:text-primary transition-colors" href="/">
               Home
-            </a>
+            </Link>
             <span className="material-symbols-outlined text-sm">
               chevron_right
             </span>
-            <a className="hover:text-primary transition-colors" href="#">
-              Tech
-            </a>
+            <Link
+              className="hover:text-primary transition-colors"
+              href={`/categories/${post.categories?.[0]?.slug || "category"}`}
+            >
+              {post.categories?.[0]?.slug || "Category"}
+            </Link>
             <span className="material-symbols-outlined text-sm">
               chevron_right
             </span>
             <span className="text-slate-900 dark:text-white truncate">
-              The Future of Neural Interfaces
+              {post.title.split(" ").slice(0, 5).join(" ") +
+                (post.title.split(" ").length > 5 ? " ..." : "")}
             </span>
           </nav>
           {/* <!-- Category Tag --> */}
           <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider rounded-full mb-4">
-            Neurotechnology
+            {post.categories?.[0]?.name || "Uncategorized"}
           </span>
           {/* <!-- Title --> */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] mb-6 tracking-tight">
-            The Future of Neural Interfaces: Bridging Mind and Machine
+            {post.title}
           </h1>
           {/* <!-- Author & Meta --> */}
           <div className="flex items-center justify-between py-6 border-y border-slate-200 dark:border-slate-800 mb-8">
@@ -43,10 +103,17 @@ export default function BlogDetails() {
               />
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">
-                  Alex Thorne
+                  {(post.profiles as any)?.full_name || "Elon Musk Jr."}
                 </p>
                 <p className="text-sm text-slate-500">
-                  May 24, 2024 • 8 min read
+                  {new Date(
+                    post.updated_at || post.created_at,
+                  ).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}{" "}
+                  • 8 min read
                 </p>
               </div>
             </div>
@@ -56,12 +123,12 @@ export default function BlogDetails() {
               </button>
             </div>
           </div>
-          {/* <!-- Featured Image --> */}
+          {/* <!-- Post Cover Image --> */}
           <div className="mb-10 group relative">
             <img
               className="w-full aspect-video object-cover rounded-xl shadow-2xl"
               data-alt="Abstract visualization of high-tech neural network connections"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcH_iLXG5NEga3QcR169Yxht7uElueeW45ciySQ8wgHYQI-4zsg5ZY2UMWR29uZi4tzXJS212i0HVwasF4vrizTFW0wHBkVWGRmRNY90YJgKhWqE_cu8qk57KJIXC4Q4SOdgtDA7IzfDAmB4FR0INaJ-iVfM1UMeZR3fs3WPIUSBeAMl1q_xMR4HllpWivCCqcBcbUjxGEnn7dgxhc7H94peyKPL1kozhrF5IYrbRzRHDR8cSDZ56rqmg-YSsXdPqEyCRHQPlfC3M"
+              src={post.cover_image || "/placeholder-cover.jpg"}
             />
             <p className="mt-4 text-center text-sm italic text-slate-500">
               Conceptual rendering of high-density neural interface arrays.
@@ -69,57 +136,28 @@ export default function BlogDetails() {
             </p>
           </div>
           {/* <!-- Article Body --> */}
-          <div className="prose prose-slate max-w-none dark:prose-invert">
-            <p>
-              In the quiet corners of research labs across the globe, a
-              revolution is stirring—one that doesn't just change how we use
-              computers, but how we integrate with them. Neural interfaces, once
-              the realm of cyberpunk novels, are rapidly becoming our new
-              biological reality.
+          <div
+            className="prose prose-slate max-w-none dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+
+          {/* <!-- In-article Ad --> */}
+          <div className="my-12 p-8 bg-slate-100 dark:bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-center">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+              Advertisement
             </p>
-            <p>
-              The latest breakthroughs in high-bandwidth brain-computer
-              interfaces (BCIs) suggest a future where the latency between
-              thought and digital action effectively disappears. Imagine
-              controlling your entire smart home, drafting complex emails, or
-              even "feeling" the texture of virtual objects through direct
-              neural feedback.
+            <h3 className="text-xl font-bold mb-2">
+              Upgrade Your Digital Cognitive Suite
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              Experience the next level of focus with NeuroFlow Pro. 20% off for
+              Musk Blog readers.
             </p>
-            {/* <!-- In-article Ad --> */}
-            <div className="my-12 p-8 bg-slate-100 dark:bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-center">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                Advertisement
-              </p>
-              <h3 className="text-xl font-bold mb-2">
-                Upgrade Your Digital Cognitive Suite
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Experience the next level of focus with NeuroFlow Pro. 20% off
-                for Musk Blog readers.
-              </p>
-              <button className="px-6 py-2 bg-slate-900 dark:bg-primary text-white font-bold rounded-lg text-sm">
-                Learn More
-              </button>
-            </div>
-            <h2>The Architecture of Thought</h2>
-            <p>
-              The core challenge remains the 'signal-to-noise' ratio. Our brains
-              are incredibly loud environments, electrically speaking. New
-              CMOS-based sensor arrays are now reaching densities that allow us
-              to isolate individual neuron firings with unprecedented clarity.
-            </p>
-            <blockquote className="border-l-4 border-primary pl-6 my-8 italic text-xl font-medium text-slate-800 dark:text-slate-200">
-              "We aren't just building tools; we are building the next
-              evolutionary step of human communication. The bottleneck of
-              language is about to be broken."
-            </blockquote>
-            <p>
-              As we look toward 2030, the integration of AI models directly into
-              the neural loop could provide real-time cognitive enhancement,
-              memory offloading, and instantaneous translation across languages
-              without a single spoken word.
-            </p>
+            <button className="px-6 py-2 bg-slate-900 dark:bg-primary text-white font-bold rounded-lg text-sm">
+              Learn More
+            </button>
           </div>
+
           {/* <!-- Interaction Bar --> */}
           <div className="flex items-center justify-between py-8 mt-12 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-6">
