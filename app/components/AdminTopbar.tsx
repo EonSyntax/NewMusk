@@ -1,10 +1,37 @@
 import Link from "next/link";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 interface AdminTopbarProps {
   page: string;
 }
 
-export default function AdminTopbar({ page }: AdminTopbarProps) {
+export default async function AdminTopbar({ page }: AdminTopbarProps) {
+  // Get current user
+  const supabase = await createReadOnlySupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Fetch user profile with full_name and role
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("full_name, role")
+    .eq("user_id", user?.id)
+    .single();
+
+  const fullName = profile?.full_name || "User";
+
+  // Format role display
+  const formatRole = (role: string | null | undefined) => {
+    if (!role) return "Admin";
+    if (role === "admin") return "Admin";
+    if (role === "superAdmin") return "SuperAdmin";
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
+  const userRole = formatRole(profile?.role);
+
   return (
     <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -36,8 +63,8 @@ export default function AdminTopbar({ page }: AdminTopbarProps) {
         </div>
         <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-800">
           <div className="text-right">
-            <p className="text-sm font-bold">Elon Jr.</p>
-            <p className="text-xs text-primary font-semibold">Admin Role</p>
+            <p className="text-sm font-bold">{fullName}</p>
+            <p className="text-xs text-primary font-semibold">{userRole}</p>
           </div>
           <div className="h-10 w-10 rounded-full bg-slate-200 border-2 border-white dark:border-slate-800 overflow-hidden shadow-sm">
             <img

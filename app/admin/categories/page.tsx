@@ -61,16 +61,11 @@ export default async function AdminCategories() {
                   <div className="flex items-center gap-2">
                     <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700">
                       <span className="material-symbols-outlined text-lg">
-                        filter_list
+                        search
                       </span>
-                      Filter
+                      Search
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700">
-                      <span className="material-symbols-outlined text-lg">
-                        download
-                      </span>
-                      Export
-                    </button>
+                    
                   </div>
                 </div>
                 {/* <!-- Data Table --> */}
@@ -87,8 +82,8 @@ export default async function AdminCategories() {
                         <th className="px-6 py-4">Category Name</th>
                         <th className="px-6 py-4">Slug</th>
                         <th className="px-6 py-4 text-center">Post Count</th>
-                        <th className="px-6 py-4 text-center">Featured</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
+                        {/* <th className="px-6 py-4 text-center">Featured</th>
+                        <th className="px-6 py-4 text-right">Actions</th> */}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -127,12 +122,12 @@ export default async function AdminCategories() {
                               <PostCountBadge categoryId={category.id} />
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-center">
+                          {/* <td className="px-6 py-4 text-center">
                             <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-primary">
                               <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
                             </button>
-                          </td>
-                          <td className="px-6 py-4 text-right space-x-2">
+                          </td> */}
+                          {/* <td className="px-6 py-4 text-right space-x-2">
                             <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
                               <span className="material-symbols-outlined text-lg">
                                 edit
@@ -143,86 +138,11 @@ export default async function AdminCategories() {
                                 delete
                               </span>
                             </button>
-                          </td>
+                          </td> */}
                         </tr>
                       ))}
-                      {/* <!-- Row 2 --> */}
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                        <td className="px-6 py-4">
-                          <input
-                            className="rounded border-slate-300 text-primary focus:ring-primary"
-                            type="checkbox"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="size-8 rounded bg-amber-500/10 flex items-center justify-center text-amber-500">
-                              <span className="material-symbols-outlined text-base">
-                                palette
-                              </span>
-                            </div>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">
-                              Design Trends
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <code className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
-                            design-trends
-                          </code>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                            18 posts
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-primary">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 text-right space-x-2">
-                          <button className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              edit
-                            </span>
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded transition-colors">
-                            <span className="material-symbols-outlined text-lg">
-                              delete
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
                     </tbody>
                   </table>
-                  {/* <!-- Pagination --> */}
-                  <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Showing 1 to 4 of 45 categories
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <button className="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-400 hover:text-primary transition-colors">
-                        <span className="material-symbols-outlined text-base">
-                          chevron_left
-                        </span>
-                      </button>
-                      <button className="size-8 flex items-center justify-center rounded bg-primary text-white text-xs font-bold">
-                        1
-                      </button>
-                      <button className="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary text-xs font-bold">
-                        2
-                      </button>
-                      <button className="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary text-xs font-bold">
-                        3
-                      </button>
-                      <button className="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-400 hover:text-primary transition-colors">
-                        <span className="material-symbols-outlined text-base">
-                          chevron_right
-                        </span>
-                      </button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

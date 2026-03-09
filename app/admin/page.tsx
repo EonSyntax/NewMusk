@@ -1,7 +1,101 @@
 import AdminSidebar from "../components/AdminSidebar";
 import AdminTopbar from "../components/AdminTopbar";
+import { supabaseAdmin } from "@/lib/supabase/server";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
+import Link from "next/link";
 
-export default function AdminPage() {
+type PostWithRelations = {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+  author_id: string;
+  profiles: {
+    full_name: string;
+    avatar_url: string | null;
+  } | null;
+  post_categories: {
+    categories: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  }[];
+};
+
+export default async function AdminPage() {
+  // 🔐 Auth check
+  const supabase = await createReadOnlySupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // 🛡 Fetch current user's profile for role check
+  const { data: userProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user?.id)
+    .single();
+
+  const isSuperAdmin = userProfile?.role === "superAdmin";
+
+  const canModifyPost = (postAuthorId: string) => {
+    return isSuperAdmin || postAuthorId === user?.id;
+  };
+
+  // Fetch total posts
+  const { count: postsCount } = await supabaseAdmin
+    .from("posts")
+    .select("*", { count: "exact", head: true });
+
+  const totalPosts = postsCount || 0;
+
+  // Fetch total users
+  const { data: usersData, error: usersError } =
+    await supabaseAdmin.auth.admin.listUsers();
+
+  const totalUsers = usersData?.users?.length || 0;
+
+  // Fetch recent posts (latest 5)
+  const { data: recentPosts, error: postsError } = await supabaseAdmin
+    .from("posts")
+    .select(
+      `
+      id,
+      title,
+      slug,
+      status,
+      created_at,
+      author_id,
+      profiles (
+        full_name,
+        avatar_url
+      ),
+      post_categories (
+        categories (
+          id,
+          name,
+          slug
+        )
+      )
+    `,
+    )
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const posts = recentPosts as PostWithRelations[] | null;
+
+  // Date formatting function
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
       <div className="flex h-screen overflow-hidden">
@@ -24,7 +118,9 @@ export default function AdminPage() {
                 <p className="text-slate-500 text-sm font-medium">
                   Total Posts
                 </p>
-                <h3 className="text-2xl font-bold mt-1">1,240</h3>
+                <h3 className="text-2xl font-bold mt-1">
+                  {totalPosts.toLocaleString()}
+                </h3>
               </div>
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
@@ -70,7 +166,9 @@ export default function AdminPage() {
                 <p className="text-slate-500 text-sm font-medium">
                   Total Users
                 </p>
-                <h3 className="text-2xl font-bold mt-1">45.2k</h3>
+                <h3 className="text-2xl font-bold mt-1">
+                  {totalUsers.toLocaleString()}
+                </h3>
               </div>
             </div>
             {/* <!-- Charts Section --> */}
@@ -95,6 +193,8 @@ export default function AdminPage() {
                 </div>
                 <div className="relative h-64 w-full flex items-end gap-1">
                   {/* <!-- Simplified Visualization representation --> */}
+
+                  {/* recharts */}
                   <div className="absolute inset-0 flex items-end">
                     <svg
                       className="w-full h-full"
@@ -193,9 +293,12 @@ export default function AdminPage() {
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <h4 className="font-bold text-lg">Recent Posts</h4>
-                <button className="text-primary text-sm font-bold hover:underline">
+                <Link
+                  href="/admin/posts"
+                  className="text-primary text-sm font-bold hover:underline"
+                >
                   View All Posts
-                </button>
+                </Link>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -209,186 +312,75 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="h-10 w-10 bg-slate-200 rounded-lg shrink-0"
-                            data-alt="Abstract blog cover image"
-                            style={{
-                              backgroundImage:
-                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0h86gcfe-ZFq8BXzBjkfEvcVDuK_fZPwZhxWRkjqx_WkXwt4qbWXWDnnlT7JrPYn1qMC8s6wfmqu4BB9S65-LfutaeWEXCbjfHKHHyQHzLkQXdCDvdcpAvSi205IiJQIbt6wsZQJ4Q6XBN38svmQflGdLImPBIvR7ZOmk7q2ng_KwoWcsY_E2Sag1wvqXDA_H3l8mr4frPa6ArRJzE2XsW0sZv81B24T_nh7Ckk6O1JecP1YqiN9jd7O4C8gmENxcATBJXcV5qxw')",
-                              backgroundSize: "cover",
-                            }}
-                          ></div>
-                          <span className="font-semibold text-sm">
-                            Starship's Flight to Mars
+                    {posts?.map((post) => (
+                      <tr
+                        key={post.id}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="h-10 w-10 bg-slate-200 rounded-lg shrink-0"
+                              style={{
+                                backgroundImage: post.profiles?.avatar_url
+                                  ? `url('${post.profiles.avatar_url}')`
+                                  : undefined,
+                                backgroundSize: "cover",
+                              }}
+                            ></div>
+                            <span className="font-semibold text-sm">
+                              {post.title}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                          {post.post_categories &&
+                          post.post_categories.length > 0
+                            ? post.post_categories[0].categories.name
+                            : "Uncategorized"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-500">
+                          {formatDate(post.created_at)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                              post.status === "published"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {post.status}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500 font-medium">
-                        Space
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        Oct 12, 2023
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                          Published
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                          <span className="material-symbols-outlined text-slate-400">
-                            edit
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="h-10 w-10 bg-slate-200 rounded-lg shrink-0"
-                            data-alt="Cyberpunk city illustration"
-                            style={{
-                              backgroundImage:
-                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDR9S5yE_zG_dA2ZIOPI9ZH7M9XCxRYJQKu10QNhN3gS2uUnMgo_IWN_Dq_P5_eElI9xdapGVi2GA1-7MAru4e60-DzOyLgB9vr1GJFxK5YaI7BvdGETAyWsMuLl3w29nBZOGeh0uWPg9lxUqWoULEIlxZA48BvnKrdheiMo9C_-r3APl0XgvuW1XXnkElFhJ4sny_zpOsGUEe89kPqsfhXt1lc_iH2Q32yxw1zn-xHFR6ykQcuh1J_w0rQqrCvLRNdBaCorCHin6U')",
-                              backgroundSize: "cover",
-                            }}
-                          ></div>
-                          <span className="font-semibold text-sm">
-                            AI and the Future of Labor
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500 font-medium">
-                        Tech
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        Oct 10, 2023
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
-                          Draft
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                          <span className="material-symbols-outlined text-slate-400">
-                            edit
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="h-10 w-10 bg-slate-200 rounded-lg shrink-0"
-                            data-alt="Solar panels on a roof"
-                            style={{
-                              backgroundImage:
-                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBrVXiyJr1_Jg1mSVEM0vKMfM7MIb5xFskowpsjYP5_xnd7I6zH32rpHKuTKZmfG4zuHMHIEt8hBBN0vz6ND0KNpo8cVZV2l4W-2iYZYSs8vSL2QKQ_37R71mJ8gQwVihKC564LPc4GWPsL1GMdBAs8GWNAaU96Ns4CzivFKcdLO7tzm6KvmsQM-ByiFXExCCFM0dT6WrYubMoQQxONgJY4citlt-rzBrC475PmhMPI468KA9Zf7ldtjdfL9WC3b7QU8v-Jtqq_GsE')",
-                              backgroundSize: "cover",
-                            }}
-                          ></div>
-                          <span className="font-semibold text-sm">
-                            Solar Windows: Efficiency Gains
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500 font-medium">
-                        Energy
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        Oct 09, 2023
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                          Published
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                          <span className="material-symbols-outlined text-slate-400">
-                            edit
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="h-10 w-10 bg-slate-200 rounded-lg shrink-0"
-                            data-alt="Futuristic car design"
-                            style={{
-                              backgroundImage:
-                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAqNQqotzxW12fQu4QN5x0r2zCrLdmx8tPL_nFum1xvjLefcY1UhlYngKukMfVXoNMwSLiwKIs6qh54fCRIa4JDd7BdSuDnvzvBwEKERxLVkQzDfoazCbWNBM5A31cwKeGIl3TKJ78QS1ofxvnQ1TXhwdfazHg5A5Z5wz3DU-JL3oNu1EP5Sv3P8zAJgbXcHM3UTehm2fTn9HdiY4WB6ZUPeFD_lWCdp-1KPhMsmNN1w1L7hS8dcCjNECIbgGEHDj8M-LJ-eCnDiM4')",
-                              backgroundSize: "cover",
-                            }}
-                          ></div>
-                          <span className="font-semibold text-sm">
-                            Self-Driving Fleets in Cities
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500 font-medium">
-                        Future
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        Oct 05, 2023
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                          Published
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                          <span className="material-symbols-outlined text-slate-400">
-                            edit
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="h-10 w-10 bg-slate-200 rounded-lg shrink-0"
-                            data-alt="Brain computer interface diagram"
-                            style={{
-                              backgroundImage:
-                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDkMFgpmj9D3T4CtkybF4tK3s1mqQT91kBMlAKrHc_drzijsDP9ExupwDZroVzSWzdSTf4scyvrCt7kWAQTcqPMhfKVANVaBn9LdAvgHnAXDLYMYG35pDL2rZcMjzajGYoz2zvPJu4PWadv95DHBogeRtMJKyMWalfBFHpAU_qFkxKteH3s8Jw9UCbHWKBnIPmysS3qTPw5kEjIyYTQe1us8hHZIjYBSZFh1eiVvowYkH9411Z1ZHsFpNwqKRLLJU7PkJP04mReBGo')",
-                              backgroundSize: "cover",
-                            }}
-                          ></div>
-                          <span className="font-semibold text-sm">
-                            Neural Link: Early Progress
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500 font-medium">
-                        Tech
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        Oct 01, 2023
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
-                          Draft
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                          <span className="material-symbols-outlined text-slate-400">
-                            edit
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {canModifyPost(post.author_id) ? (
+                            <Link
+                              href={`/admin/posts/${post.id}/edit-post`}
+                              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors inline-block"
+                            >
+                              <span className="material-symbols-outlined text-slate-400">
+                                edit
+                              </span>
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">
+                              Read only
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {(!posts || posts.length === 0) && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-6 py-4 text-center text-slate-500"
+                        >
+                          No posts found
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -5,7 +5,13 @@ const MobileNavbar = dynamic(() => import("./MobileNavbar"), { ssr: false });
 import { useEffect, useState, useCallback } from "react";
 import MobileNavbarComponent from "./MobileNavbar";
 
-export default function MobileNavbarClient() {
+export default function MobileNavbarClient({
+  user,
+  role,
+}: {
+  user: any;
+  role: string | null;
+}) {
   const [open, setOpen] = useState(false);
   const onClose = useCallback(() => setOpen(false), []);
 
@@ -15,5 +21,12 @@ export default function MobileNavbarClient() {
     return () => window.removeEventListener("open-mobile-navbar", handler);
   }, []);
 
-  return <MobileNavbarComponent open={open} onClose={onClose} />;
+  return (
+    <MobileNavbarComponent
+      open={open}
+      onClose={onClose}
+      user={user}
+      role={role}
+    />
+  );
 }

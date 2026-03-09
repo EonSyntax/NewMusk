@@ -15,7 +15,7 @@ export default function PostEditorForm({ initialContent }: Props) {
       <NichTextEditor content={initialContent} onChange={setContent} />
 
       {/* Hidden input for form submission */}
-      <input type="hidden" name="content" value={content} />
+      <input type="hidden" name="content" value={content} required />
     </>
   );
 }

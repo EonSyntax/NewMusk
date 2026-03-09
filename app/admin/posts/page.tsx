@@ -4,7 +4,7 @@ import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
-
+import DeletePostButton from "./DeletePostButton";
 
 type PostWithRelations = {
   id: string;
@@ -49,8 +49,9 @@ export default async function AdminPostsDashboard() {
 
   // 📦 Fetch posts
   const { data, error } = await supabaseAdmin
-  .from("posts")
-  .select(`
+    .from("posts")
+    .select(
+      `
     id,
     title,
     slug,
@@ -68,13 +69,24 @@ export default async function AdminPostsDashboard() {
         slug
       )
     )
-  `)
-  .order("created_at", { ascending: false });
+  `,
+    )
+    .order("created_at", { ascending: false });
 
-const posts = data as PostWithRelations[] | null;
+  const posts = data as PostWithRelations[] | null;
 
   const canModifyPost = (postAuthorId: string) => {
     return isSuperAdmin || postAuthorId === user.id;
+  };
+
+  // Date formatting function
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   if (error) {
@@ -199,7 +211,7 @@ const posts = data as PostWithRelations[] | null;
                             {post.title}
                           </a>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {new Date(post.created_at).toLocaleDateString()}
+                            {formatDate(post.created_at)}
                           </p>
                         </td>
                         <td className="p-4">
@@ -241,7 +253,13 @@ const posts = data as PostWithRelations[] | null;
                           </button>
                         </td>
                         <td className="p-4">
-                          <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                          <span
+                            className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              post.status === "published"
+                                ? "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                            }`}
+                          >
                             {post.status}
                           </span>
                         </td>
@@ -269,15 +287,10 @@ const posts = data as PostWithRelations[] | null;
                                     visibility
                                   </span>
                                 </button>
-                                <Link
-                                  href={`/admin/posts/${post.id}/delete`}
-                                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
-                                  title="Delete"
-                                >
-                                  <span className="material-symbols-outlined text-[20px]">
-                                    delete
-                                  </span>
-                                </Link>
+                                <DeletePostButton
+                                  postId={post.id}
+                                  postTitle={post.title}
+                                />
                               </>
                             ) : (
                               <span className="text-xs text-slate-400 italic">

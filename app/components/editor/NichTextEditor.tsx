@@ -12,7 +12,7 @@ interface Props {
   onChange: (value: string) => void;
 }
 
-export default function RichTextEditor({ content, onChange }: Props) {
+export default function NichTextEditor({ content, onChange }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -200,7 +200,7 @@ export default function RichTextEditor({ content, onChange }: Props) {
           </span>
         </button>
         <div className="relative group">
-          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+          <button type="button" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
             <span className="material-symbols-outlined">
               format_align_justify
             </span>

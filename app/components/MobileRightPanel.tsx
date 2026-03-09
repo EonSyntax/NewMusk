@@ -12,6 +12,7 @@ export default function MobileRightPanel({ children }: MobileRightPanelProps) {
     <>
       {/* Toggle button: visible only on mobile */}
       <button
+        type="button"
         className="md:hidden fixed top-4 right-4 z-40 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-lg"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close right panel" : "Open right panel"}
@@ -33,6 +34,7 @@ export default function MobileRightPanel({ children }: MobileRightPanelProps) {
             {children}
             {/* Close button on left side of panel */}
             <button
+              type="button"
               className="absolute top-4 left-4 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-lg"
               onClick={() => setOpen(false)}
               aria-label="Close right panel"

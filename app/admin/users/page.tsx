@@ -1,8 +1,68 @@
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
-import React from "react";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
-export default function AdminUsers() {
+export default async function AdminUsers() {
+  // Fetch all users from auth
+  const { data: usersData, error: usersError } =
+    await supabaseAdmin.auth.admin.listUsers();
+  if (usersError) throw usersError;
+
+  // Fetch all profiles
+  const { data: profiles, error: profilesError } = await supabaseAdmin
+    .from("profiles")
+    .select("user_id, full_name, role");
+  if (profilesError) throw profilesError;
+
+  // Fetch posts count per author
+  const { data: postsData, error: postsError } = await supabaseAdmin
+    .from("posts")
+    .select("author_id");
+  if (postsError) throw postsError;
+
+  const postsCount =
+    postsData?.reduce(
+      (acc, post) => {
+        acc[post.author_id] = (acc[post.author_id] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ) || {};
+
+  // Combine data
+  const users = usersData.users.map((user) => {
+    const profile = profiles?.find((p) => p.user_id === user.id);
+    const posts = postsCount[user.id] || 0;
+    return {
+      id: user.id,
+      email: user.email,
+      name: profile?.full_name || user.email?.split("@")[0] || "Unknown",
+      role: profile?.role || "normalUser",
+      posts,
+    };
+  });
+
+  const getRoleSpan = (role: string) => {
+    if (role === "superAdmin") {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-primary/10 text-yellow-600 border border-primary/20">
+          Super Admin
+        </span>
+      );
+    } else if (role === "admin") {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+          Admin
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+          Reader
+        </span>
+      );
+    }
+  };
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
       <div className="flex h-screen overflow-hidden">
@@ -24,7 +84,7 @@ export default function AdminUsers() {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-2xl font-black">1,284</h3>
+                  <h3 className="text-2xl font-black">{users.length}</h3>
                   <span className="text-xs font-bold text-emerald-500 flex items-center">
                     +12%{" "}
                     <span className="material-symbols-outlined text-xs">
@@ -132,297 +192,85 @@ export default function AdminUsers() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-primary/5">
-                    {/* <!-- Row 1 --> */}
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-primary/20 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="size-10 rounded-full overflow-hidden bg-slate-100"
-                            data-alt="Sarah Jenkins profile picture"
-                          >
-                            <img
-                              alt="User"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA21Zhymnd87muoMVuIy72MhIdlk0sxUFMxoxOdR4Ija8d5FiE3B6llWxIJgy35mKjx4qZwL7HrqhhmVxhMYtVLrTrUk4xdOs_zaZNH6_cUzubwVPts1bkaoobIl4Jg2yly0gpGRwibIbOAYQ8RNB1osGUTkXdGrtTA3mlFxnR-_EGTJzp58IEotFiBWbb5-kDXJWfSC_3aShfH97BVzulR_WKSeTiLfkmRUZfDKZhDUOeNPFihUjmDBvg3d4IVsLG-63Wg7BC58fg"
-                            />
+                    {users.map((user) => (
+                      <tr
+                        key={user.id}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                      >
+                        <td className="p-4">
+                          <input
+                            className="rounded border-primary/20 text-primary focus:ring-primary"
+                            type="checkbox"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="size-10 rounded-full overflow-hidden bg-slate-100"
+                              data-alt={`${user.name} profile picture`}
+                            >
+                              <img
+                                alt="User"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA21Zhymnd87muoMVuIy72MhIdlk0sxUFMxoxOdR4Ija8d5FiE3B6llWxIJgy35mKjx4qZwL7HrqhhmVxhMYtVLrTrUk4xdOs_zaZNH6_cUzubwVPts1bkaoobIl4Jg2yly0gpGRwibIbOAYQ8RNB1osGUTkXdGrtTA3mlFxnR-_EGTJzp58IEotFiBWbb5-kDXJWfSC_3aShfH97BVzulR_WKSeTiLfkmRUZfDKZhDUOeNPFihUjmDBvg3d4IVsLG-63Wg7BC58fg"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold">{user.name}</p>
+                              <p className="text-xs text-slate-500">
+                                {user.email}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold">Sarah Jenkins</p>
-                            <p className="text-xs text-slate-500">
-                              sarah.j@newmusk.com
-                            </p>
+                        </td>
+                        <td className="p-4">{getRoleSpan(user.role)}</td>
+                        <td className="p-4 text-center">
+                          <span className="text-sm font-medium">
+                            {user.posts}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                            <span className="size-1.5 rounded-full bg-emerald-500"></span>
+                            Active
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              className="p-1.5 text-slate-400 hover:text-primary transition-colors"
+                              title="Edit"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">
+                                edit
+                              </span>
+                            </button>
+                            <button
+                              className="p-1.5 text-slate-400 hover:text-orange-500 transition-colors"
+                              title="Suspend"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">
+                                block
+                              </span>
+                            </button>
+                            <button
+                              className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
+                              title="Delete"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">
+                                delete
+                              </span>
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-                          Admin
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="text-sm font-medium">142</span>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          <span className="size-1.5 rounded-full bg-emerald-500"></span>
-                          Active
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-primary transition-colors"
-                            title="Edit"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              edit
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-orange-500 transition-colors"
-                            title="Suspend"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              block
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
-                            title="Delete"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 2 --> */}
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-primary/20 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="size-10 rounded-full overflow-hidden bg-slate-100"
-                            data-alt="Marcus Chen profile picture"
-                          >
-                            <img
-                              alt="User"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpBIbaFoXIwMqBWEba5rN1mECDSzSCKjOEwNaquYd1m_T1mVg4u00Tw90QtjhTrxpn9ScU4aJ_BnPPxsSjgUQrkSf5xY4pqOd5TYxUkcYy9iG0B22m2TvzoKyabXGostZdpYSgMqbZGjSvcFcC_yIYWgk8uBibr-V4E1tlfqaHE2Iq5JfYl0m6bvIiI3h1SDJSU5VskZZUXWqrnZePg5V-rEjxoQ9K53R4hv6MSPUP-bGo9DHKfUkeKtRBbLKCVTw36WekTg7Te0w"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold">Marcus Chen</p>
-                            <p className="text-xs text-slate-500">
-                              m.chen@outlook.com
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                          Editor
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="text-sm font-medium">89</span>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          <span className="size-1.5 rounded-full bg-emerald-500"></span>
-                          Active
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-primary transition-colors"
-                            title="Edit"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              edit
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-orange-500 transition-colors"
-                            title="Suspend"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              block
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
-                            title="Delete"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 3 --> */}
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors bg-rose-50/20 dark:bg-rose-900/10">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-primary/20 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="size-10 rounded-full overflow-hidden bg-slate-100"
-                            data-alt="Elena Rodriguez profile picture"
-                          >
-                            <img
-                              alt="User"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlwyCWJIcNBIHX0BcTpdeOl5q0k8Bo6c98MoYaaUX5Dq1dRDPtbgnL-KHyENIHgaW6UxAvkhXUKfjdTemjIkw5TaqoZuc3krTsforu6OTvB9UQei42sfcLlG6_M663rzEOQg900fLpxb-2amN6uuSWNG-BJ7DhsMPGO_8_Zr3nPAdQHL-W9sUHyfVMhFS2QfPen4E1Fa8h5o-L4oeuWilxd3MShBDKcHsOep12u_k_hf7DkI1ZaJK03bC_k_4tQBSq6r6sGvhcEQs"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-400 line-through">
-                              Elena Rodriguez
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              elena.r@gmail.com
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                          Author
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="text-sm font-medium text-slate-400">
-                          12
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full">
-                          <span className="size-1.5 rounded-full bg-rose-500"></span>
-                          Suspended
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-primary transition-colors"
-                            title="Edit"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              edit
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-primary hover:text-emerald-500 transition-colors"
-                            title="Unsuspend"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              lock_open
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
-                            title="Delete"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 4 --> */}
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="p-4">
-                        <input
-                          className="rounded border-primary/20 text-primary focus:ring-primary"
-                          type="checkbox"
-                        />
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="size-10 rounded-full overflow-hidden bg-slate-100"
-                            data-alt="David Smith profile picture"
-                          >
-                            <img
-                              alt="User"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYLLpQXZ0N2w_peNv610ED2Q_ZLjr6PywXVOK0a9RuUEZEJrVgd1j7DYPTUo7iW7euxASRUMO1yUtO7UwtwO4P2GqSTupCedOJTbZzAYg60pa9R0j5Rs_dxSvMJMkfH8um68QrVoHDqsVUujVc2E1Yf8urV-iZIRke2OkHeyKJFmUJNDsZO4EjmMew8ePvQEqdxfSG3Gl-Bbl0IrjMJjnWSgGJgD0vN7X1NSERhbhthbiwCq6I34iWOOsshqe3d_02ZgRqG2_S9FQ"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold">David Smith</p>
-                            <p className="text-xs text-slate-500">
-                              dsmith.editor@techmail.com
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                          Contributor
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="text-sm font-medium">5</span>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          <span className="size-1.5 rounded-full bg-emerald-500"></span>
-                          Active
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-primary transition-colors"
-                            title="Edit"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              edit
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-orange-500 transition-colors"
-                            title="Suspend"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              block
-                            </span>
-                          </button>
-                          <button
-                            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
-                            title="Delete"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">
-                              delete
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
               {/* <!-- Pagination --> */}
               <div className="p-4 border-t border-primary/5 flex items-center justify-between">
                 <span className="text-xs text-slate-500 font-medium">
-                  Showing 1-10 of 1,284 users
+                  Showing 1-{Math.min(10, users.length)} of {users.length} users
                 </span>
                 <div className="flex items-center gap-1">
                   <button className="p-2 text-slate-400 hover:text-primary disabled:opacity-30 disabled:hover:text-slate-400">
@@ -452,7 +300,7 @@ export default function AdminUsers() {
               </div>
             </div>
             {/* <!-- Action Context Banner --> */}
-            <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">
                   info
@@ -469,7 +317,7 @@ export default function AdminUsers() {
                   Suspend Selection
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </main>
       </div>
