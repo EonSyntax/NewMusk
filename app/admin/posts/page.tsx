@@ -4,14 +4,18 @@ import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
-import DeletePostButton from "./DeletePostButton";
+import DeletePostButton from "../../components/DeletePostButton";
+import VisibilityToggleButton from "../../components/VisibilityToggleButton";
+import FeaturedToggleButton from "../../components/FeaturedToggleButton";
 
 type PostWithRelations = {
   id: string;
   title: string;
   slug: string;
   status: string;
+  featured: string;
   created_at: string;
+  updated_at: string | null;
   author_id: string;
   profiles: {
     full_name: string;
@@ -56,7 +60,9 @@ export default async function AdminPostsDashboard() {
     title,
     slug,
     status,
+    featured,
     created_at,
+    updated_at,
     author_id,
     profiles (
       full_name,
@@ -74,6 +80,9 @@ export default async function AdminPostsDashboard() {
     .order("created_at", { ascending: false });
 
   const posts = data as PostWithRelations[] | null;
+
+  const defaultAvatarUrl =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc";
 
   const canModifyPost = (postAuthorId: string) => {
     return isSuperAdmin || postAuthorId === user.id;
@@ -211,7 +220,7 @@ export default async function AdminPostsDashboard() {
                             {post.title}
                           </a>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {formatDate(post.created_at)}
+                            {formatDate(post.updated_at || post.created_at)}
                           </p>
                         </td>
                         <td className="p-4">
@@ -220,8 +229,9 @@ export default async function AdminPostsDashboard() {
                               className="w-6 h-6 rounded-full bg-slate-200"
                               data-alt="Author avatar"
                               style={{
-                                backgroundImage:
-                                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDKunYtTLqhGQwKdWvnxOjPz28HlBRm33ozYi_CaIwq00ZvVu4z3psbXcGHbPOmHUvazJNxkyXetGzEdb2rX5n2LXAMQrp5h8y9OCHRxQWSeekNruBa6txzIDmCTvX9XU8FLtdujoRBn2IiARHoU_-KlvSmZVfE3sG1FlJ0MvOI2oqQFBUFFIKSS2NmHdFa1H9iP87hALzZErK7I3d0aEdrxecM5MzY53bMxdWSgBLjeZfnCufi2Ii9MTGMOtlcqNXzbUWQ7hWv9rg')",
+                                backgroundImage: `url('${
+                                  post.profiles?.avatar_url || defaultAvatarUrl
+                                }')`,
                                 backgroundSize: "cover",
                               }}
                             ></div>
@@ -248,9 +258,11 @@ export default async function AdminPostsDashboard() {
                           )}
                         </td>
                         <td className="p-4 text-center">
-                          <button className="relative inline-flex h-5 w-9 items-center rounded-full bg-primary">
-                            <span className="inline-block h-3.5 w-3.5 translate-x-5 transform rounded-full bg-white transition"></span>
-                          </button>
+                          <FeaturedToggleButton
+                            postId={post.id}
+                            postTitle={post.title}
+                            currentFeatured={post.featured}
+                          />
                         </td>
                         <td className="p-4">
                           <span
@@ -279,14 +291,11 @@ export default async function AdminPostsDashboard() {
                                     edit
                                   </span>
                                 </Link>
-                                <button
-                                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
-                                  title="Preview"
-                                >
-                                  <span className="material-symbols-outlined text-[20px]">
-                                    visibility
-                                  </span>
-                                </button>
+                                <VisibilityToggleButton
+                                  postId={post.id}
+                                  postTitle={post.title}
+                                  currentStatus={post.status}
+                                />
                                 <DeletePostButton
                                   postId={post.id}
                                   postTitle={post.title}

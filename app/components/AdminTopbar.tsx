@@ -13,14 +13,17 @@ export default async function AdminTopbar({ page }: AdminTopbarProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch user profile with full_name and role
+  // Fetch user profile with full_name, role, and avatar_url
   const { data: profile } = await supabaseAdmin
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_url")
     .eq("user_id", user?.id)
     .single();
 
   const fullName = profile?.full_name || "User";
+  const defaultAvatarUrl =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc";
+  const avatarUrl = profile?.avatar_url || defaultAvatarUrl;
 
   // Format role display
   const formatRole = (role: string | null | undefined) => {
@@ -71,7 +74,7 @@ export default async function AdminTopbar({ page }: AdminTopbarProps) {
               alt="User Profile"
               className="w-full h-full object-cover"
               data-alt="Portrait of a professional administrator"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdHTB7LB5haZ0ESOAKwtBfgPDpa6jKdP7fOaMdrXwkeRVvm3J8ldShqm3Qmx11LMhL7lbizY2_ed4rENEpPUvhGTsZbpgH2zVGa8LAccxsg7201FNrjuNuIQ-f33adUt23nh5-LgGuQ5JCrwOem-9vLeSm_Fs5GaGpu90rtk-A9OHZKdn4yMH11KyaR9SJ0TDOnnHbDRnYoSN6ov76MLIE64OFJgVRYsl71QfmrNPqjnyEkbxOuxLZJkSNen9AZk1pM1PP50uWCvY"
+              src={avatarUrl}
             />
           </div>
         </div>

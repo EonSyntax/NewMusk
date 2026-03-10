@@ -1,5 +1,83 @@
+import { supabaseAdmin } from "@/lib/supabase/server";
+import Link from "next/link";
+import LatestPostsSection from "../components/LatestPostsSection";
 
-export default function Home() {
+export default async function Home() {
+  // Fetch latest 5 featured posts
+  const { data: featuredPosts, error } = await supabaseAdmin
+    .from("posts")
+    .select(
+      `
+      id,
+      title,
+      slug,
+      description,
+      cover_image,
+      created_at,
+      status,
+      featured,
+      post_categories (
+        categories (
+          name,
+          slug
+        )
+      )
+    `,
+    )
+    .eq("status", "published")
+    .eq("featured", "on")
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  const posts =
+    featuredPosts?.map((post: any) => ({
+      ...post,
+      category: post.post_categories?.[0]?.categories?.name || "Uncategorized",
+      categorySlug: post.post_categories?.[0]?.categories?.slug || "",
+    })) || [];
+
+  // Fetch the 10 latest posts for the latest updates section
+  const { data: latestPostsData } = await supabaseAdmin
+    .from("posts")
+    .select(
+      `
+      id,
+      title,
+      slug,
+      description,
+      cover_image,
+      created_at,
+      profiles:author_id!inner (
+        full_name
+      ),
+      post_categories (
+        categories (
+          name,
+          slug
+        )
+      )
+    `,
+    )
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  const latestPosts =
+    latestPostsData?.map((post: any) => ({
+      ...post,
+      author_name: post.profiles?.full_name || "Unknown Author",
+      category: post.post_categories?.[0]?.categories?.name || "Uncategorized",
+      categorySlug: post.post_categories?.[0]?.categories?.slug || "",
+      formattedDate: new Date(post.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    })) || [];
+
+  // Get the latest post for the hero section
+  const heroPost = latestPosts[0];
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       {/* Header Banner Ad */}
@@ -15,41 +93,62 @@ export default function Home() {
       {/* Hero Section: Top Story */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 group cursor-pointer">
-          <div className="relative aspect-21/9 overflow-hidden rounded-xl shadow-lg">
-            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent z-10"></div>
-            <img
-              alt="Top Story"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAh-2dL3PiLaWSbAdr2SlnCfR7U8Ccz3lQdvcEQtYXNVBm8IZlPRklDbWwYZPN83k3ypVDBXhlzMGKNYT9jYJOc3Jegh6EeX4JSqPijPFY07M92KGjyRNi42I1oHBXIJk4YLjy5NvWKrlOmpW2CHIl1TNuIYSVteThAmpbal3Zjkihc8XA6lMTaiuhAh77wjgnDcqSSe6BHL3-XqDXiCCgWlgjYV6prP8fC5vnzumB1lvt8lYEZm2QfIAUZQ92g4HQjV9QpkPKLkzs"
-            />
-            <div className="absolute bottom-0 left-0 p-6 sm:p-10 z-20 text-white space-y-4">
-              <span className="inline-block px-3 py-1 bg-primary text-xs font-bold uppercase tracking-wider rounded-full">
-                Must Read
-              </span>
-              <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight">
-                The Quantum Leap: Silicon Valley's Next Big Bet on AGI
-              </h1>
-              <p className="text-slate-200 text-sm sm:text-lg max-w-2xl line-clamp-2">
-                Inside the top-secret labs where researchers are bridging the
-                gap between artificial intelligence and human cognition,
-                potentially rewriting the rules of modern physics.
-              </p>
-              <div className="flex items-center gap-4 text-xs sm:text-sm text-slate-300">
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">
-                    schedule
+          {heroPost ? (
+            <Link href={`/${heroPost.categorySlug}/${heroPost.slug}`}>
+              <div className="relative aspect-21/15 overflow-hidden rounded-xl shadow-lg">
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+                <img
+                  alt={heroPost.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src={
+                    heroPost.cover_image ||
+                    "https://via.placeholder.com/800x300"
+                  }
+                />
+                <div className="absolute bottom-0 left-0 p-6 sm:p-10 z-20 text-white space-y-4">
+                  <span className="inline-block px-3 py-1 bg-primary text-xs font-bold uppercase tracking-wider rounded-full">
+                    Latest Story
                   </span>
-                  2 hours ago
+                  <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight">
+                    {heroPost.title}
+                  </h1>
+                  <p className="text-slate-200 text-sm sm:text-lg max-w-2xl line-clamp-2">
+                    {heroPost.description}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs sm:text-sm text-slate-300">
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">
+                        schedule
+                      </span>
+                      {new Date(heroPost.created_at).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        },
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">
+                        person
+                      </span>
+                      {heroPost.author_name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="relative aspect-21/9 overflow-hidden rounded-xl shadow-lg bg-slate-200 flex items-center justify-center">
+              <div className="text-center text-slate-500">
+                <span className="material-symbols-outlined text-6xl mb-4">
+                  article
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">
-                    person
-                  </span>
-                  Elena Vance
-                </span>
+                <p className="text-lg font-medium">No posts available</p>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Trending Sidebar */}
@@ -112,146 +211,53 @@ export default function Home() {
           <h2 className="text-2xl font-bold">Featured Stories</h2>
           <a
             className="text-sm font-bold text-primary hover:underline"
-            href="#"
+            href="/featuredposts"
           >
             View All
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              alt: "Digital charts and stock market data on a dark screen",
-              src: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3wzgJxGGdBXpLJVeA9voKkYQgevyU0-mrUpBf1lBu9A_ISDR-1NsYQUEKR3HthCY0HsryAvdXT1n60K-83B3lSzZTryOs1FBdruH9r8-4a_S1qDAhVpxDM978ck-yYPx8rAYtJO8Uh_8Bo7UvND3lnoK8ht5wqDSkVcMDEAl9-_ebVgfWO86zGpAmGVSIigh2TJ9OPpRw74TGkqrbPN0RBtO90l6HWl_JOofHWvJDZc5C6Y6jSRU3sPBAT1lk2AMyWyMh0LtdkC8",
-              category: "Business",
-              title: "The Future of Decentralized Finance",
-              description:
-                "Exploring how blockchain is disrupting traditional banking ecosystems globally.",
-            },
-            {
-              alt: "Doctor holding a futuristic transparent medical tablet",
-              src: "https://lh3.googleusercontent.com/aida-public/AB6AXuA_3hImwVZAV3oD94gpVTxund9zV4vflaeElocpwyNkMSuYM-PWW-hBigqcmgfvAfK-H3aqtwe-sTxezLYX6PcViIwdfy-D0oj8ho8qHOQG-yxtOEpPPE7o6Iev4rUhfHU240OIoJo614cN6HHd6Iai6z60IYwvVHNVfLmqQa0-fbnQYCJmOyyag7cp8c_mq2OSZ8WETZykENNlzcU24gpKPq2WsDcEo4lA_aVsZtm-bslxXd3L5Ymxrdm9EdYI41uVQv06pX__E5Q",
-              category: "Health",
-              title: "AI Diagnostics: A New Era of Care",
-              description:
-                "Medical professionals are now using neural networks for early cancer detection.",
-            },
-            {
-              alt: "Athlete running on an urban street at sunset",
-              src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDsJ5PnK-6M1zswB_cvKi1a0dsb8toJ5FUsbY_iiCMc7DrQXKVz4CukGZtGUGE012bpunU5KzGhUYRrxCE0vAQcw24-EEf1aHSJuGNwvRAkwsuVAQ_Ofs_6OLL4ZJLm2zya6TGGGZKIYWIcgXreLpWAREPs-ITP2kOkksJN9q5_QF3g_B07C8-eZqXlvVdN5tyjiavkaL26cASPuNmClmNcuZa_2IKx6lIz9Uhd8ld2l4enYZd1QC3higTB6o0bzMcUHjf56JoWQvQ",
-              category: "Sports",
-              title: "Wearable Tech in Professional Athletics",
-              description:
-                "How data-driven coaching is breaking world records across disciplines.",
-            },
-            {
-              alt: "Modern university classroom with large windows and bright lights",
-              src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFjA9XBfx-XUm-RIA_PPLd0vkT0vUJhsx5sdLGC8bN6fi8HF599SoOR12hNszkjXc0vQNdmUH1vpyGAIuVbD3uG1dBsV4eDrhMY_9EqmTgymJ2QvhcHSG4sWPl8_3F1tU9hxkl2i4XTOjlz5wxDIcHM2cX7oUWBuYdiWtHOuy3y9SeHyr8j9Et5Q0JiVIwcZ98Euy3k9sFhSRT3zPKw6_5gFi5fyaQX6miL1yesiFRXfASLircQ9inaBKSZW7EL3DtS12dWBVSC18",
-              category: "Education",
-              title: "Reimagining Higher Ed in 2026",
-              description:
-                "Hybrid learning environments are becoming the standard for top universities.",
-            },
-          ].map((card, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
-            >
-              <div className="aspect-video relative overflow-hidden">
-                <img
-                  alt={card.alt}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  src={card.src}
-                />
-              </div>
-              <div className="p-4 space-y-2">
-                <span className="text-[10px] font-bold text-primary uppercase">
-                  {card.category}
-                </span>
-                <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors">
-                  {card.title}
-                </h3>
-                <p className="text-xs text-slate-500 line-clamp-2">
-                  {card.description}
-                </p>
-              </div>
+          {posts.length > 0 ? (
+            posts.map((post, index) => (
+              <Link
+                key={post.id}
+                href={`/${post.categorySlug}/${post.slug}`}
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
+              >
+                <div className="aspect-video relative overflow-hidden">
+                  <img
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    src={post.cover_image || "/placeholder-image.jpg"}
+                  />
+                </div>
+                <div className="p-4 space-y-2">
+                  <span className="text-[10px] font-bold text-primary uppercase">
+                    {post.category}
+                  </span>
+                  <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 line-clamp-2">
+                    {post.description}
+                  </p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-slate-500">
+                No featured posts available at the moment.
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </section>
 
       {/* Main Content + Sidebar Ad */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Latest Posts */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold">Latest Updates</h2>
-            <div className="flex-1 h-px bg-slate-200"></div>
-          </div>
-          <div className="space-y-6">
-            {[
-              {
-                category: "POLITICS",
-                date: "MAY 14, 2026",
-                title:
-                  "Legislative Changes Predicted to Affect Freelance Workforce",
-                description:
-                  "New labor laws are currently under review in the senate that could redefine employment status for millions.",
-                img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBO2UYPsjCXU5oHjn1Arxob6tA_Bc_q_HGhd7LlWd9OtJrIIC1hk_lTCgM9HpeZ2xxmZwjtKuyfIhRWZBZmoNyJUfP-HRvHd1yYdb_cRpStezNiXnARVz53oSMKnBKrthHLoo7eZLiK9Tpfy7B16lGRFfdOm1njtiJjA_sz8GnJDmb7kfV7ClZFxkC5mKTZvfHTd6LScGysUvcaso1US8Qye-L4xCvrhaY33SMlsynYILwhKTom45YFQkK0YRzz0fzvvsbseh9aT0U",
-              },
-              {
-                category: "HEALTH",
-                date: "MAY 13, 2026",
-                title: "Groundbreaking Research in Regenerative Medicine",
-                description:
-                  "Scientists have successfully repaired spinal tissues using synthetic scaffolding techniques.",
-                img: "https://lh3.googleusercontent.com/aida-public/AB6AXuD69ridq4JFXGdViuTfpYLfF89BhpUQpN-zIxtgaJNMPZvvEzR0IntnIL3XeXPSNPO2JQbCRVZzvbtOtvD0g5CTC48zCdeRxmOhY9G_JBaqy3T1zLnsKrvd0aKCCHx83gJhQePy7YfFSRu3dUpaKa8jdYVPaaQ-Qlongid4d8msoN1Q1GX-wn1-YZb9MY3qkngc-em-sY6ZVR-zgwmPoKEdQTIxAYbGrc7Mm2iuvIfkbA6eAVpwwpJgfW9Aj6F6zUSDLgE76jjr42s",
-              },
-            ].map((post, index) => (
-              <div
-                key={index}
-                className="flex flex-col sm:flex-row gap-6 bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all"
-              >
-                <div className="w-full sm:w-48 h-32 shrink-0 bg-slate-200 rounded-lg overflow-hidden">
-                  <img
-                    alt="Latest"
-                    className="w-full h-full object-cover"
-                    src={post.img}
-                  />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold">
-                    <span className="text-primary">{post.category}</span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-slate-500">{post.date}</span>
-                  </div>
-                  <h3 className="text-xl font-bold hover:text-primary transition-colors cursor-pointer">
-                    {post.title}
-                  </h3>
-                  <p className="text-slate-600 text-sm line-clamp-2">
-                    {post.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {/* Loading Skeleton State */}
-            <div className="flex flex-col sm:flex-row gap-6 p-4 border border-slate-100 rounded-xl opacity-60">
-              <div className="w-full sm:w-48 h-32 shrink-0 bg-slate-200 rounded-lg skeleton"></div>
-              <div className="flex-1 space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-16 h-3 bg-slate-200 rounded skeleton"></div>
-                  <div className="w-24 h-3 bg-slate-200 rounded skeleton"></div>
-                </div>
-                <div className="w-3/4 h-5 bg-slate-200 rounded skeleton"></div>
-                <div className="w-full h-4 bg-slate-200 rounded skeleton"></div>
-                <div className="w-1/2 h-4 bg-slate-200 rounded skeleton"></div>
-              </div>
-            </div>
-          </div>
-          <button className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors">
-            Load More Stories
-          </button>
-        </div>
-
+        <LatestPostsSection posts={latestPosts.slice(1)} />
         {/* Sidebar */}
         <aside className="lg:col-span-4 space-y-8">
           {/* Sidebar Ad */}
@@ -296,54 +302,74 @@ export default function Home() {
 
       {/* Category Highlights */}
       <section className="space-y-12">
-        {/* Tech Row */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold border-l-4 border-primary pl-4">
-              Technology
+              Categories
             </h2>
-            <a
-              className="text-sm font-bold text-primary group flex items-center gap-1"
-              href="#"
-            >
-              Explore Tech
-              <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">
-                arrow_forward
-              </span>
-            </a>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex gap-6 overflow-x-auto pb-4">
             {[
               {
-                alt: "Open laptop on a desk showing code",
+                name: "Sports",
+                slug: "sports",
+                title: "Explore Our Sports Coverage",
                 src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBq38KD2h_vEKD5znZhwOlQGI4t3jcGxc4NEqUa68ETX1rXYI7NkihXw9eIVHa4qi-lxTSS0AUL-r5_W_MhtOwtCzgkMKDW8sNJnJlLUka7WrdPTbq3A-A4xUc91m8Rn_z52f0MGaHHogJkpmVEkI5-xFGSYgoXnOgqUalyKncwI85dO1GYnrZxNqZjk2I98MesNDbb5T04NkixzTcJw4YAvdqYkuHMryra-lMdJ4_G939eiexm6ZIeNGNjJpoqXlM2jJddo8lkTjo",
-                title: "The Chips Act: 2 Years Later",
               },
               {
-                alt: "Engineer working with a robotic arm in a lab",
+                name: "Politics",
+                slug: "politics",
+                title: "Explore Our Politics Discoveries",
                 src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDG77aT5aO4jYvsPuB9Pg3nLqkgNYy1Unep4NjwjEGDmm3RLfdU-keu8vofCZmNjumD5XBSxpV7eOXwaqBuTAhgBlZvoYJ0zpOz-03KIPtlKo8MwinOAQkb0P2gE8MF7rrymq7chjNNwmPWf_tmiFue-c1SMqYlWJJNsMZUpD135QyumkxjQi2cwcbkC1mF86Uo4BWTkLwJSw1maajZnJnZRTfvYk7voa2TqtbAEf3nUse8zYMrxvGuHYCoTviiB7fn9_LGjq1Cd_Q",
-                title: "Robotics in Manufacturing Surge",
               },
               {
-                alt: "Green binary code lines on a black screen",
+                name: "Education",
+                slug: "education",
+                title: "Explore Our Education Insights",
                 src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCcC70Vvke8789J8udWlpNPXdtYpAy8ooq6Q8V8Nb61HUQmfqgS8nqmHj6GIJ0eRP3cUQJqGJcproPCN-oum2w0yx-3AoKFpI0iQWXqGmZI-j9p82cLfc4ENlDzcxQqut2p6WnQW9Wr3kaw4BVu-lA3F3t7ML2g2SRB_HwVkWMo8iQnYXTPf0eB0rd9TYx7OZ-B8mZk_aDXVNlKUbJa4-nv_strH6RBAe5V1BdOx9plKncW-AiK5N2_kaXiEN-r5upI8vi848CPZLg",
-                title: "Cybersecurity in the Age of AI",
+              },
+              {
+                name: "Technology",
+                slug: "tech",
+                title: "Explore Our Technology Innovations",
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDG77aT5aO4jYvsPuB9Pg3nLqkgNYy1Unep4NjwjEGDmm3RLfdU-keu8vofCZmNjumD5XBSxpV7eOXwaqBuTAhgBlZvoYJ0zpOz-03KIPtlKo8MwinOAQkb0P2gE8MF7rrymq7chjNNwmPWf_tmiFue-c1SMqYlWJJNsMZUpD135QyumkxjQi2cwcbkC1mF86Uo4BWTkLwJSw1maajZnJnZRTfvYk7voa2TqtbAEf3nUse8zYMrxvGuHYCoTviiB7fn9_LGjq1Cd_Q",
+              },
+              {
+                name: "Business",
+                slug: "business",
+                title: "Explore Our Business Insights",
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBq38KD2h_vEKD5znZhwOlQGI4t3jcGxc4NEqUa68ETX1rXYI7NkihXw9eIVHa4qi-lxTSS0AUL-r5_W_MhtOwtCzgkMKDW8sNJnJlLUka7WrdPTbq3A-A4xUc91m8Rn_z52f0MGaHHogJkpmVEkI5-xFGSYgoXnOgqUalyKncwI85dO1GYnrZxNqZjk2I98MesNDbb5T04NkixzTcJw4YAvdqYkuHMryra-lMdJ4_G939eiexm6ZIeNGNjJpoqXlM2jJddo8lkTjo",
+              },
+              {
+                name: "Health",
+                slug: "health",
+                title: "Explore Our Health Discoveries",
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCcC70Vvke8789J8udWlpNPXdtYpAy8ooq6Q8V8Nb61HUQmfqgS8nqmHj6GIJ0eRP3cUQJqGJcproPCN-oum2w0yx-3AoKFpI0iQWXqGmZI-j9p82cLfc4ENlDzcxQqut2p6WnQW9Wr3kaw4BVu-lA3F3t7ML2g2SRB_HwVkWMo8iQnYXTPf0eB0rd9TYx7OZ-B8mZk_aDXVNlKUbJa4-nv_strH6RBAe5V1BdOx9plKncW-AiK5N2_kaXiEN-r5upI8vi848CPZLg",
+              },
+              {
+                name: "Entertainment",
+                slug: "entertainment",
+                title: "Explore Our Entertainment World",
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBq38KD2h_vEKD5znZhwOlQGI4t3jcGxc4NEqUa68ETX1rXYI7NkihXw9eIVHa4qi-lxTSS0AUL-r5_W_MhtOwtCzgkMKDW8sNJnJlLUka7WrdPTbq3A-A4xUc91m8Rn_z52f0MGaHHogJkpmVEkI5-xFGSYgoXnOgqUalyKncwI85dO1GYnrZxNqZjk2I98MesNDbb5T04NkixzTcJw4YAvdqYkuHMryra-lMdJ4_G939eiexm6ZIeNGNjJpoqXlM2jJddo8lkTjo",
               },
             ].map((card, index) => (
-              <div
+              <Link
                 key={index}
-                className="relative group cursor-pointer overflow-hidden rounded-xl aspect-4/3"
+                href={`/${card.slug}`}
+                className="shrink-0 w-120 group"
               >
-                <img
-                  alt={card.alt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  src={card.src}
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
-                <div className="absolute bottom-0 p-4 text-white">
-                  <h4 className="font-bold leading-snug">{card.title}</h4>
+                <div className="relative overflow-hidden rounded-xl aspect-4/3">
+                  <img
+                    alt={card.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={card.src}
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
+                  <div className="absolute bottom-0 p-4 text-white">
+                    <h4 className="font-bold leading-snug">{card.title}</h4>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

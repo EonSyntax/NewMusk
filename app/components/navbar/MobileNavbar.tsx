@@ -6,10 +6,12 @@ import React, { useState, useEffect } from "react";
 const catego = [
   { name: "Home", href: "/", icon: "home" },
   { name: "Sports", href: "/sports", icon: "sports_esports" },
-  { name: "Tech", href: "/tech", icon: "memory" },
+  { name: "Politics", href: "/politics", icon: "account_balance" },
+  { name: "Education", href: "/education", icon: "school" },
+  { name: "Technology", href: "/tech", icon: "memory" },
+  { name: "Business", href: "/business", icon: "business" },
   { name: "Health", href: "/health", icon: "health_and_safety" },
   { name: "Entertainment", href: "/entertainment", icon: "movie" },
-  { name: "Politics", href: "/politics", icon: "account_balance" },
 ];
 
 const MobileNavbar = ({

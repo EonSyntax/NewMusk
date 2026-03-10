@@ -1,6 +1,7 @@
 import AdminSidebar from "@/app/components/AdminSidebar";
 import MobileRightPanel from "@/app/components/MobileRightPanel";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 import { createPost } from "../actions";
 import Link from "next/link";
 import PostEditorForm from "@/app/components/editor/PostEditorForm";
@@ -9,6 +10,34 @@ import StatusButtonUpdater from "@/app/components/StatusButtonUpdater";
 
 export default async function CreatePostPage() {
   const supabase = supabaseAdmin;
+  const readOnlySupabase = await createReadOnlySupabase();
+
+  // Get current user
+  const {
+    data: { user },
+  } = await readOnlySupabase.auth.getUser();
+
+  // Fetch user profile with full_name, role, and avatar_url
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("full_name, role, avatar_url")
+    .eq("user_id", user?.id)
+    .single();
+
+  const fullName = profile?.full_name || "User";
+  const defaultAvatarUrl =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc";
+  const avatarUrl = profile?.avatar_url || defaultAvatarUrl;
+
+  // Format role display
+  const formatRole = (role: string | null | undefined) => {
+    if (!role) return "Admin";
+    if (role === "admin") return "Admin";
+    if (role === "superAdmin") return "SuperAdmin";
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
+  const userRole = formatRole(profile?.role);
 
   const { data: categories } = await supabase
     .from("categories")
@@ -52,9 +81,9 @@ export default async function CreatePostPage() {
                 </div>
                 <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-800">
                   <div className="text-right">
-                    <p className="text-sm font-bold">Elon Jr.</p>
+                    <p className="text-sm font-bold">{fullName}</p>
                     <p className="text-xs text-primary font-semibold">
-                      Admin Role
+                      {userRole}
                     </p>
                   </div>
                   <div className="h-10 w-10 rounded-full bg-slate-200 border-2 border-white dark:border-slate-800 overflow-hidden shadow-sm">
@@ -62,7 +91,7 @@ export default async function CreatePostPage() {
                       alt="User Profile"
                       className="w-full h-full object-cover"
                       data-alt="Portrait of a professional administrator"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdHTB7LB5haZ0ESOAKwtBfgPDpa6jKdP7fOaMdrXwkeRVvm3J8ldShqm3Qmx11LMhL7lbizY2_ed4rENEpPUvhGTsZbpgH2zVGa8LAccxsg7201FNrjuNuIQ-f33adUt23nh5-LgGuQ5JCrwOem-9vLeSm_Fs5GaGpu90rtk-A9OHZKdn4yMH11KyaR9SJ0TDOnnHbDRnYoSN6ov76MLIE64OFJgVRYsl71QfmrNPqjnyEkbxOuxLZJkSNen9AZk1pM1PP50uWCvY"
+                      src={avatarUrl}
                     />
                   </div>
                 </div>
@@ -221,6 +250,26 @@ export default async function CreatePostPage() {
                       </div>
                     </div>
                   </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Read Time (Min)
+                    </h3>
+                    <select
+                      name="read_time_minutes"
+                      className="w-fit bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm py-2 px-3 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-slate-800 dark:focus:border-slate-500 focus:outline-none"
+                      required
+                    >
+                      <option value="">Select reading time...</option>
+                      {[
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45,
+                        60,
+                      ].map((min) => (
+                        <option key={min} value={min}>
+                          {min} min
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </MobileRightPanel>
               {/* Desktop right panel: hidden on mobile, visible on md+ */}
@@ -305,7 +354,7 @@ export default async function CreatePostPage() {
                       Status
                     </h3>
                     <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
-                        <label className="flex items-center gap-2 cursor-pointer group">
+                      <label className="flex items-center gap-2 cursor-pointer group">
                         <input
                           id="status-draft-desktop"
                           name="status"
@@ -329,6 +378,26 @@ export default async function CreatePostPage() {
                         </span>
                       </label>
                     </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Read Time (Min)
+                    </h3>
+                    <select
+                      name="read_time_minutes"
+                      className="w-fit bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm py-2 px-3 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-slate-800 dark:focus:border-slate-500 focus:outline-none"
+                      required
+                    >
+                      <option value="">Select reading time...</option>
+                      {[
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45,
+                        60,
+                      ].map((min) => (
+                        <option key={min} value={min}>
+                          {min} min
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { deletePost } from "./actions";
+import { deletePost } from "../admin/posts/actions";
 
 interface DeletePostButtonProps {
   postId: string;

@@ -13,6 +13,7 @@ export async function createPost(formData: FormData) {
   const description = formData.get("description") as string;
   const content = formData.get("content") as string;
   const status = formData.get("status") as string;
+  const read_time_minutes = formData.get("read_time_minutes") as string;
   const categoryIds = formData.getAll("categories") as string[];
 
   if (!title || !content) {
@@ -37,6 +38,7 @@ export async function createPost(formData: FormData) {
       content,
       author_id: user.id,
       status,
+      read_time_minutes: read_time_minutes ? parseInt(read_time_minutes) : null,
     })
     .select()
     .single();
@@ -72,6 +74,7 @@ export async function updatePost(formData: FormData) {
   const description = formData.get("description") as string;
   const content = formData.get("content") as string;
   const status = formData.get("status") as string;
+  const read_time_minutes = formData.get("read_time_minutes") as string;
   const categoryIds = formData.getAll("categories") as string[];
 
   const {
@@ -92,6 +95,7 @@ export async function updatePost(formData: FormData) {
       slug,
       content,
       status,
+      read_time_minutes: read_time_minutes ? parseInt(read_time_minutes) : null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
@@ -155,6 +159,104 @@ export async function deletePost(postId: string) {
 
   // Delete the post
   const { error } = await supabaseAdmin.from("posts").delete().eq("id", postId);
+
+  if (error) throw error;
+
+  // Revalidate the posts page to refresh the list
+  revalidatePath("/admin/posts");
+
+  return { success: true };
+}
+
+export async function togglePostVisibility(postId: string, newStatus: string) {
+  const supabase = await createReadOnlySupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  // Fetch the post to check ownership
+  const { data: post, error: fetchError } = await supabaseAdmin
+    .from("posts")
+    .select("author_id")
+    .eq("id", postId)
+    .single();
+
+  if (fetchError || !post) throw new Error("Post not found");
+
+  // Check if user is superAdmin or post author
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  const isSuperAdmin = profile?.role === "superAdmin";
+  const isAuthor = post.author_id === user.id;
+
+  if (!isSuperAdmin && !isAuthor) {
+    throw new Error("Unauthorized: You cannot modify this post");
+  }
+
+  // Update the post status
+  const { error } = await supabaseAdmin
+    .from("posts")
+    .update({
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", postId);
+
+  if (error) throw error;
+
+  // Revalidate the posts page to refresh the list
+  revalidatePath("/admin/posts");
+
+  return { success: true };
+}
+
+export async function toggleFeaturedPost(postId: string, newFeatured: string) {
+  const supabase = await createReadOnlySupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  // Fetch the post to check ownership
+  const { data: post, error: fetchError } = await supabaseAdmin
+    .from("posts")
+    .select("author_id")
+    .eq("id", postId)
+    .single();
+
+  if (fetchError || !post) throw new Error("Post not found");
+
+  // Check if user is superAdmin or post author
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  const isSuperAdmin = profile?.role === "superAdmin";
+  const isAuthor = post.author_id === user.id;
+
+  if (!isSuperAdmin && !isAuthor) {
+    throw new Error("Unauthorized: You cannot modify this post");
+  }
+
+  // Update the post featured status
+  const { error } = await supabaseAdmin
+    .from("posts")
+    .update({
+      featured: newFeatured,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", postId);
 
   if (error) throw error;
 

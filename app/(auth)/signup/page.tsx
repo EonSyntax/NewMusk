@@ -8,6 +8,8 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +18,6 @@ export default function SignUpPage() {
       alert("Passwords do not match.");
       return;
     }
-
 
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -118,8 +119,8 @@ export default function SignUpPage() {
                 </span>
               </div>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center px-4 py-3 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors gap-3 group">
+            <div className="mt-6 w-full flex items-center justify-center">
+              <button className="flex items-center justify-center px-14 py-3 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors gap-3 group">
                 <svg
                   className="size-5"
                   viewBox="0 0 24 24"
@@ -144,19 +145,6 @@ export default function SignUpPage() {
                 </svg>
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Google
-                </span>
-              </button>
-              <button className="flex items-center justify-center px-4 py-3 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors gap-3 group">
-                <svg
-                  className="size-5 text-slate-900 dark:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-                </svg>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Twitter
                 </span>
               </button>
             </div>
@@ -215,16 +203,17 @@ export default function SignUpPage() {
                       name="password"
                       placeholder="••••••••"
                       required
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors"
                       type="button"
+                      onClick={() => setShowPassword(!showPassword)}
                     >
                       <span className="material-symbols-outlined">
-                        visibility
+                        {showPassword ? "visibility_off" : "visibility"}
                       </span>
                     </button>
                   </div>
@@ -244,16 +233,19 @@ export default function SignUpPage() {
                       name="confirm-password"
                       placeholder="••••••••"
                       required
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     <button
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors"
                       type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                     >
                       <span className="material-symbols-outlined">
-                        visibility
+                        {showConfirmPassword ? "visibility_off" : "visibility"}
                       </span>
                     </button>
                   </div>

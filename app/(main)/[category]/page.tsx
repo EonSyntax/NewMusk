@@ -61,8 +61,10 @@ export default async function CategoryPage({
       description,
       cover_image,
       created_at,
+      updated_at,
       status,
       author_id,
+      read_time_minutes,
       profiles:author_id!inner (
         full_name
       )
@@ -154,7 +156,7 @@ export default async function CategoryPage({
                   </span>
                 </Link>
                 <span className="text-slate-300 text-sm">
-                  12 min read •{" "}
+                  {latestPost.read_time_minutes || 5} min read •{" "}
                   {new Date(
                     latestPost.updated_at || latestPost.created_at,
                   ).toLocaleDateString("en-US", {
@@ -267,6 +269,11 @@ export default async function CategoryPage({
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       src={post.cover_image || "/placeholder-cover.jpg"}
                     />
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-white/90 backdrop-blur text-slate-900 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider">
+                        AI
+                      </span>
+                    </div>
                   </div>
                 </Link>
                 <Link href={`/${category}/${post.slug}`} className="block">
@@ -291,9 +298,13 @@ export default async function CategoryPage({
                     </span>
                   </div>
                   <span className="text-xs text-slate-400">
-                    {post.created_at
-                      ? new Date(post.created_at).toLocaleDateString()
-                      : ""}
+                    {new Date(
+                      post.updated_at || post.created_at,
+                    ).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </span>
                 </div>
               </article>
@@ -343,7 +354,7 @@ export default async function CategoryPage({
                       "Optimus Gen 2: The End of Physical Labor?"}
                   </h5>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                    Robotics • 5m Read
+                    Robotics • {latestPost?.read_time_minutes || 5}m Read
                   </p>
                 </div>
               </a>
@@ -357,7 +368,7 @@ export default async function CategoryPage({
                       "Solar Roof V3: Efficiency Gains Explained"}
                   </h5>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                    Energy • 8m Read
+                    Energy • {postsList?.[1]?.read_time_minutes || 8}m Read
                   </p>
                 </div>
               </a>
@@ -371,7 +382,7 @@ export default async function CategoryPage({
                       "Mars Habitat Prototypes: First Look"}
                   </h5>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                    Space • 12m Read
+                    Space • {postsList?.[2]?.read_time_minutes || 12}m Read
                   </p>
                 </div>
               </a>

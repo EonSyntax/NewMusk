@@ -245,7 +245,7 @@ export default async function EditPostPage({
                             name="status"
                             value="draft"
                             type="radio"
-                            defaultChecked
+                            defaultChecked={post.status === "draft"}
                             className="w-4 h-4 text-primary"
                           />
                           <span className="text-xs">Draft</span>
@@ -257,12 +257,31 @@ export default async function EditPostPage({
                             name="status"
                             value="published"
                             type="radio"
+                            defaultChecked={post.status === "published"}
                             className="w-4 h-4 text-primary"
                           />
                           <span className="text-xs">Publish</span>
                         </label>
                       </div>
                     </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Read Time (Min)
+                    </h3>
+                    <select
+                      name="read_time_minutes"
+                      defaultValue={post.read_time_minutes || ""}
+                      className="w-fit bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm py-2 px-3 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-slate-800 dark:focus:border-slate-500 focus:outline-none"
+                      required
+                    >
+                      <option value="">Select reading time...</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45, 60].map((min) => (
+                        <option key={min} value={min}>
+                          {min} min
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </MobileRightPanel>
@@ -355,22 +374,44 @@ export default async function EditPostPage({
                           value="draft"
                           className="w-4 h-4 rounded text-primary focus:ring-primary border-slate-300"
                           type="radio"
+                          defaultChecked={post.status === "draft"}
                         />
                         <span className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-900 transition-colors">
                           Draft
                         </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer group">
                         <input
                           id="status-published-desktop"
                           name="status"
                           value="published"
                           className="w-4 h-4 rounded text-primary focus:ring-primary border-slate-300"
                           type="radio"
+                          defaultChecked={post.status === "published"}
                         />
                         <span className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-900 transition-colors">
                           Publish
                         </span>
                       </label>
                     </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Read Time (Min)
+                    </h3>
+                    <select
+                      name="read_time_minutes"
+                      defaultValue={post.read_time_minutes || ""}
+                      className="w-fit bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm py-2 px-3 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-slate-800 dark:focus:border-slate-500 focus:outline-none"
+                      required
+                    >
+                      <option value="">Select reading time...</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45, 60].map((min) => (
+                        <option key={min} value={min}>
+                          {min} min
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

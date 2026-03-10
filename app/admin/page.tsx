@@ -324,7 +324,7 @@ export default async function AdminPage() {
                               style={{
                                 backgroundImage: post.profiles?.avatar_url
                                   ? `url('${post.profiles.avatar_url}')`
-                                  : undefined,
+                                  : `url("https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc")`,
                                 backgroundSize: "cover",
                               }}
                             ></div>
@@ -344,7 +344,7 @@ export default async function AdminPage() {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
                               post.status === "published"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-amber-100 text-amber-700"

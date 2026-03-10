@@ -1,6 +1,92 @@
 import Navbar from "@/app/components/navbar/Navbar";
+import {
+  createReadOnlySupabase,
+  createClient,
+} from "@/lib/supabase/layoutServer";
+import { revalidatePath } from "next/cache";
+import ProfileEditModal from "../../components/ProfileEditModal";
+import AvatarUpload from "../../components/AvatarUpload";
+import SignOutButton from "@/app/components/navbar/SignOutButton";
+import SidebarEditProfile from "../../components/SidebarEditProfile";
 
-export default function UserProfile() {
+async function updateProfile(formData: FormData) {
+  "use server";
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const fullName = formData.get("full_name") as string;
+  const country = formData.get("country") as string;
+
+  await supabase
+    .from("profiles")
+    .update({ full_name: fullName, country: country })
+    .eq("user_id", user.id);
+
+  revalidatePath("/user/profile");
+}
+
+async function updateAvatar(formData: FormData) {
+  "use server";
+  const avatarUrl = formData.get("avatar_url") as string;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  await supabase
+    .from("profiles")
+    .update({ avatar_url: avatarUrl })
+    .eq("user_id", user.id);
+
+  revalidatePath("/user/profile");
+}
+
+export default async function UserProfile() {
+  const supabase = await createReadOnlySupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let profile: {
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string | null;
+    country: string | null;
+    created_at: string | null;
+  } | null = null;
+
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url, role, country, created_at")
+      .eq("user_id", user.id)
+      .single();
+
+    profile = data;
+  }
+
+  const fullName = profile?.full_name || user?.email?.split("@")[0] || "User";
+  const avatarUrl =
+    profile?.avatar_url ||
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc";
+          const rawRole = profile?.role || "normalUser";
+  const role =
+    rawRole === "admin"
+      ? "Admin"
+      : rawRole === "superAdmin"
+        ? "SuperAdmin"
+        : "Member";
+  const country = profile?.country || "Nationality";
+  const memberSince = profile?.created_at
+    ? new Date(profile.created_at)
+        .toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+        .replace(" ", ", ")
+    : "Jan, 23";
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
@@ -12,38 +98,37 @@ export default function UserProfile() {
             <div className="relative">
               <div
                 className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-32 md:size-40 border-4 border-white dark:border-slate-900 shadow-xl"
-                data-alt="High resolution profile photo of Alex Thorne"
+                data-alt={`High resolution profile photo of ${fullName}`}
                 style={{
-                  backgroundImage:
-                    'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlSX1ANU9qmI5OxZZEv3LmMfY4jhZkKIt-6zCkc_IIaEZhlK1rUYmVANpoNJt44Vk0T1RL6ItqEJTBLLB_kkC-6yuDAAhsf10iFDssXTuQQw0zU6Z7n9c7EMBcDFQPkr18bUkVWdCQNQt9jT5IHgVedy2HXIsE_4sX_FVl3O7mWNqLwlsQT92mqOIWg2cVMC8VlCdtf1RIr1L6OzTnIuzyB5_uqrsMi2wMgfL6yMX_Ku797RSee-57petfK-zGF0W0aVJW0dMJP_c")',
+                  backgroundImage: `url('${avatarUrl}')`,
                 }}
               ></div>
-              <button className="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-900 flex items-center justify-center">
-                <span className="material-symbols-outlined text-sm">edit</span>
-              </button>
+              <AvatarUpload
+                currentAvatarUrl={avatarUrl}
+                updateAvatar={updateAvatar}
+              />
             </div>
             <div className="flex-1 text-center md:text-left space-y-2">
-              <div className="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-1 mb-2">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  Alex Thorne
+                  {fullName}
                 </h1>
-                <div className="flex gap-2 justify-center">
-                  <button className="px-4 py-1.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-md">
-                    Edit Profile
-                  </button>
-                  <button className="px-4 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-all">
-                    Share
-                  </button>
+                <div className="">
+                  <ProfileEditModal
+                    currentName={fullName}
+                    currentCountry={country}
+                    updateProfile={updateProfile}
+                  />
                 </div>
               </div>
               <p className="text-slate-600 dark:text-slate-400 text-lg">
-                Product Designer &amp; Tech Enthusiast
+                {role}
               </p>
               <div className="flex items-center justify-center md:justify-start gap-1 text-slate-500 text-sm">
-                <span className="material-symbols-outlined text-base">
+                <span className="material-symbols-outlined text-primary">
                   location_on
                 </span>
-                <span>San Francisco, CA</span>
+                <span>{country}</span>
               </div>
             </div>
           </section>
@@ -65,7 +150,7 @@ export default function UserProfile() {
             </div>
             <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6 rounded-xl text-center transition-transform hover:-translate-y-1">
               <p className="text-slate-900 dark:text-white text-3xl font-bold mb-1">
-                Jan '23
+                {memberSince}
               </p>
               <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">
                 Member Since
@@ -269,10 +354,11 @@ export default function UserProfile() {
                 </h3>
                 <ul className="space-y-4">
                   <li className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-lg">
-                      person_edit
-                    </span>{" "}
-                    Edit Profile Information
+                    <SidebarEditProfile
+                      currentName={fullName}
+                      currentCountry={country}
+                      updateProfile={updateProfile}
+                    />
                   </li>
                   <li className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer">
                     <span className="material-symbols-outlined text-lg">
@@ -286,11 +372,8 @@ export default function UserProfile() {
                     </span>{" "}
                     Subscription &amp; Billing
                   </li>
-                  <li className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-lg text-rose-500">
-                      logout
-                    </span>{" "}
-                    Sign Out
+                  <li>
+                    <SignOutButton />
                   </li>
                 </ul>
               </div>
@@ -325,23 +408,23 @@ export default function UserProfile() {
               </span>
             </div>
             <div className="flex gap-8 text-slate-500 text-sm">
-              <a className="hover:text-primary transition-colors" href="#">
+              <a className="hover:text-primary transition-colors" href="/privacypolicy">
                 Privacy
               </a>
-              <a className="hover:text-primary transition-colors" href="#">
+              <a className="hover:text-primary transition-colors" href="/termsofservice">
                 Terms
               </a>
-              <a className="hover:text-primary transition-colors" href="#">
-                Careers
+              <a className="hover:text-primary transition-colors" href="/about">
+                About
               </a>
-              <a className="hover:text-primary transition-colors" href="#">
+              {/* <a className="hover:text-primary transition-colors" href="/help">
                 Help
-              </a>
+              </a> */}
             </div>
             <div className="flex gap-4">
               <a
                 className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-primary transition-all"
-                href="#"
+                
               >
                 <svg className="size-4 fill-current" viewBox="0 0 24 24">
                   <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
@@ -349,7 +432,7 @@ export default function UserProfile() {
               </a>
               <a
                 className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-primary transition-all"
-                href="#"
+               
               >
                 <svg className="size-4 fill-current" viewBox="0 0 24 24">
                   <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path>
@@ -358,7 +441,7 @@ export default function UserProfile() {
             </div>
           </div>
           <div className="max-w-7xl mx-auto mt-8 text-center text-slate-400 text-xs">
-            © 2024 NewMusk Media. All rights reserved.
+            © {new Date().getFullYear()} NewMusk Blog. All rights reserved.
           </div>
         </footer>
       </div>

@@ -1,8 +1,26 @@
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 
 export default async function AdminUsers() {
+  const supabase = await createReadOnlySupabase();
+
+  // 🔐 Auth
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  // 🛡 Role
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  const isSuperAdmin = profile?.role === "superAdmin";
   // Fetch all users from auth
   const { data: usersData, error: usersError } =
     await supabaseAdmin.auth.admin.listUsers();
@@ -11,7 +29,7 @@ export default async function AdminUsers() {
   // Fetch all profiles
   const { data: profiles, error: profilesError } = await supabaseAdmin
     .from("profiles")
-    .select("user_id, full_name, role");
+    .select("user_id, full_name, role, avatar_url");
   if (profilesError) throw profilesError;
 
   // Fetch posts count per author
@@ -30,6 +48,9 @@ export default async function AdminUsers() {
     ) || {};
 
   // Combine data
+  const defaultAvatarUrl =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc";
+
   const users = usersData.users.map((user) => {
     const profile = profiles?.find((p) => p.user_id === user.id);
     const posts = postsCount[user.id] || 0;
@@ -38,9 +59,14 @@ export default async function AdminUsers() {
       email: user.email,
       name: profile?.full_name || user.email?.split("@")[0] || "Unknown",
       role: profile?.role || "normalUser",
+      avatarUrl: profile?.avatar_url || defaultAvatarUrl,
       posts,
     };
   });
+
+  const activeAuthorsCount = users.filter(
+    (user) => user.role === "admin" || user.role === "superAdmin",
+  ).length;
 
   const getRoleSpan = (role: string) => {
     if (role === "superAdmin") {
@@ -103,7 +129,7 @@ export default async function AdminUsers() {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-2xl font-black">856</h3>
+                  <h3 className="text-2xl font-black">{activeAuthorsCount}</h3>
                   <span className="text-xs font-bold text-emerald-500 flex items-center">
                     +5%{" "}
                     <span className="material-symbols-outlined text-xs">
@@ -122,11 +148,11 @@ export default async function AdminUsers() {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-2xl font-black">12</h3>
-                  <span className="text-xs font-bold text-rose-500 flex items-center">
-                    -2%{" "}
-                    <span className="material-symbols-outlined text-xs">
-                      trending_down
+                  <h3 className="text-2xl font-black">0</h3>
+                  <span className="text-xs font-bold text-emerald-500 flex items-center">
+                    0%{" "}
+                    <span className="material-symbols-outlined text-orange-500 text-xs">
+                      trending_up
                     </span>
                   </span>
                 </div>
@@ -148,9 +174,8 @@ export default async function AdminUsers() {
                 <select className="rounded-lg border-primary/10 bg-white dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary pr-10">
                   <option>All Roles</option>
                   <option>Admin</option>
-                  <option>Editor</option>
-                  <option>Author</option>
-                  <option>Contributor</option>
+                  <option>SuperAdmin</option>
+                  <option>Member</option>
                 </select>
                 <select className="rounded-lg border-primary/10 bg-white dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary pr-10">
                   <option>Status: All</option>
@@ -209,10 +234,7 @@ export default async function AdminUsers() {
                               className="size-10 rounded-full overflow-hidden bg-slate-100"
                               data-alt={`${user.name} profile picture`}
                             >
-                              <img
-                                alt="User"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA21Zhymnd87muoMVuIy72MhIdlk0sxUFMxoxOdR4Ija8d5FiE3B6llWxIJgy35mKjx4qZwL7HrqhhmVxhMYtVLrTrUk4xdOs_zaZNH6_cUzubwVPts1bkaoobIl4Jg2yly0gpGRwibIbOAYQ8RNB1osGUTkXdGrtTA3mlFxnR-_EGTJzp58IEotFiBWbb5-kDXJWfSC_3aShfH97BVzulR_WKSeTiLfkmRUZfDKZhDUOeNPFihUjmDBvg3d4IVsLG-63Wg7BC58fg"
-                              />
+                              <img alt="User" src={user.avatarUrl} />
                             </div>
                             <div>
                               <p className="text-sm font-bold">{user.name}</p>
@@ -236,30 +258,38 @@ export default async function AdminUsers() {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              className="p-1.5 text-slate-400 hover:text-primary transition-colors"
-                              title="Edit"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                edit
+                            {isSuperAdmin ? (
+                              <>
+                                <button
+                                  className="p-1.5 text-slate-400 hover:text-primary transition-colors"
+                                  title="Edit"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">
+                                    edit
+                                  </span>
+                                </button>
+                                <button
+                                  className="p-1.5 text-slate-400 hover:text-orange-500 transition-colors"
+                                  title="Suspend"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">
+                                    block
+                                  </span>
+                                </button>
+                                <button
+                                  className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
+                                  title="Delete"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">
+                                    delete
+                                  </span>
+                                </button>
+                              </>
+                            ) : (
+                              <span className="text-xs text-slate-400 font-medium">
+                                Super Admin Only
                               </span>
-                            </button>
-                            <button
-                              className="p-1.5 text-slate-400 hover:text-orange-500 transition-colors"
-                              title="Suspend"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                block
-                              </span>
-                            </button>
-                            <button
-                              className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
-                              title="Delete"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                delete
-                              </span>
-                            </button>
+                            )}
                           </div>
                         </td>
                       </tr>
