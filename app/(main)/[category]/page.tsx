@@ -66,7 +66,7 @@ export default async function CategoryPage({
       author_id,
       read_time_minutes,
       profiles:author_id!inner (
-        full_name
+        full_name, avatar_url
       )
     ),
     categories!inner (
@@ -91,6 +91,10 @@ export default async function CategoryPage({
             post.profiles && post.profiles.full_name
               ? post.profiles.full_name
               : "Unknown Author",
+          author_avatar:
+            post.profiles && post.profiles.avatar_url
+              ? post.profiles.avatar_url
+              : "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc",
         };
       })
       .filter(Boolean) as any[]) || [];
@@ -290,7 +294,7 @@ export default async function CategoryPage({
                       <img
                         alt="Author"
                         data-alt="Male author portrait"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSSJII3nKUXqE7J9_XGzHF8lgIcQspfwsUUnQQ67bdiBQtWJoR5Zh3ji2KqRCL7RV43wISHvWzgncmgASkgi9qVXEt9sgiVLEtNTPGpatVBUEYwbo3WBBAsXeNZ18l80fqrdjB6Z0R9YG3V9Si99DluaAFYsHrXWC-l949P7soKKPEkmqnBwoxwk4w-YrGWILS9YLFMt0u9SiEytr4K1mUTOOdF-QokDSd4OZWFHrQKAOHqOIpZ1TvOp0hJswkbg8_TYcKkqCf8js"
+                        src={post.author_avatar}
                       />
                     </div>
                     <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">

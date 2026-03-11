@@ -6,6 +6,7 @@ import { createPost } from "../actions";
 import Link from "next/link";
 import PostEditorForm from "@/app/components/editor/PostEditorForm";
 import CoverImageUpload from "@/app/components/editor/CoverImageUpload";
+import TagsInput from "@/app/components/editor/TagsInput";
 import StatusButtonUpdater from "@/app/components/StatusButtonUpdater";
 
 export default async function CreatePostPage() {
@@ -137,6 +138,7 @@ export default async function CreatePostPage() {
                   <PostEditorForm initialContent="" />
                 </div>
               </div>
+
               {/* Mobile right panel toggle button & panel */}
               <MobileRightPanel>
                 <div className="p-6 space-y-6">
@@ -148,6 +150,7 @@ export default async function CreatePostPage() {
                       Publish
                     </button>
                   </div>
+
                   {/* <!-- Publish Box --> */}
                   <div className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -192,7 +195,7 @@ export default async function CreatePostPage() {
                     </div>
                   </div>
 
-                  {/* <!-- Categories & Tags --> */}
+                  {/* <!-- Categories --> */}
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
@@ -219,6 +222,8 @@ export default async function CreatePostPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* STATUS */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
                       Status
@@ -250,6 +255,16 @@ export default async function CreatePostPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* TAGS */}
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Tags
+                    </h3>
+                    <TagsInput maxTags={10} />
+                  </div>
+
+                  {/* READ TIME */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
                       Read Time (Min)
@@ -272,6 +287,7 @@ export default async function CreatePostPage() {
                   </div>
                 </div>
               </MobileRightPanel>
+
               {/* Desktop right panel: hidden on mobile, visible on md+ */}
               <div className="hidden md:block w-80 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-background-dark/50 overflow-y-auto">
                 <div className="p-6 space-y-6">
@@ -283,6 +299,7 @@ export default async function CreatePostPage() {
                       Publish
                     </button>
                   </div>
+
                   {/* <!-- Publish Box --> */}
                   <div className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -322,7 +339,7 @@ export default async function CreatePostPage() {
                     </div>
                   </div>
 
-                  {/* <!-- Categories & Tags --> */}
+                  {/* <!-- Categories --> */}
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
@@ -349,6 +366,8 @@ export default async function CreatePostPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* STATUS */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
                       Status
@@ -379,6 +398,16 @@ export default async function CreatePostPage() {
                       </label>
                     </div>
                   </div>
+
+                  {/* TAGS */}
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Tags
+                    </h3>
+                    <TagsInput maxTags={10} />
+                  </div>
+
+                  {/* READ TIME */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
                       Read Time (Min)

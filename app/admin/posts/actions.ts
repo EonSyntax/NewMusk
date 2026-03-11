@@ -15,6 +15,15 @@ export async function createPost(formData: FormData) {
   const status = formData.get("status") as string;
   const read_time_minutes = formData.get("read_time_minutes") as string;
   const categoryIds = formData.getAll("categories") as string[];
+  // Parse tags from hidden input (JSON array)
+  let tags: string[] = [];
+  const tagsRaw = formData.get("tags");
+  if (typeof tagsRaw === "string") {
+    try {
+      const parsed = JSON.parse(tagsRaw);
+      if (Array.isArray(parsed)) tags = parsed.slice(0, 10);
+    } catch {}
+  }
 
   if (!title || !content) {
     throw new Error("Title and content are required");
@@ -39,6 +48,7 @@ export async function createPost(formData: FormData) {
       author_id: user.id,
       status,
       read_time_minutes: read_time_minutes ? parseInt(read_time_minutes) : null,
+      tags,
     })
     .select()
     .single();

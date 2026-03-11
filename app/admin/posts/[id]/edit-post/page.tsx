@@ -8,6 +8,7 @@ import { updatePost } from "../../actions";
 import CoverImageUpload from "@/app/components/editor/CoverImageUpload";
 import MobileRightPanel from "@/app/components/MobileRightPanel";
 import StatusButtonUpdater from "@/app/components/StatusButtonUpdater";
+import TagsInput from "@/app/components/editor/TagsInput";
 
 export default async function EditPostPage({
   params,
@@ -276,12 +277,23 @@ export default async function EditPostPage({
                       required
                     >
                       <option value="">Select reading time...</option>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45, 60].map((min) => (
+                      {[
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45,
+                        60,
+                      ].map((min) => (
                         <option key={min} value={min}>
                           {min} min
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* TAGS */}
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Tags
+                    </h3>
+                    <TagsInput maxTags={10} />
                   </div>
                 </div>
               </MobileRightPanel>
@@ -362,6 +374,8 @@ export default async function EditPostPage({
                       </div>
                     </div>
                   </div>
+
+                  {/* STATUS */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
                       Status
@@ -379,8 +393,6 @@ export default async function EditPostPage({
                         <span className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-900 transition-colors">
                           Draft
                         </span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer group">
                         <input
                           id="status-published-desktop"
                           name="status"
@@ -395,6 +407,15 @@ export default async function EditPostPage({
                       </label>
                     </div>
                   </div>
+
+                  {/* TAGS */}
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
+                      Tags
+                    </h3>
+                    <TagsInput maxTags={10} />
+                  </div>
+
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest px-1 mb-3">
                       Read Time (Min)
@@ -406,7 +427,10 @@ export default async function EditPostPage({
                       required
                     >
                       <option value="">Select reading time...</option>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45, 60].map((min) => (
+                      {[
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 45,
+                        60,
+                      ].map((min) => (
                         <option key={min} value={min}>
                           {min} min
                         </option>
