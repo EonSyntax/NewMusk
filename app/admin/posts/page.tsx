@@ -2,7 +2,7 @@ import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { redirect, searchParams as nextSearchParams } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 import DeletePostButton from "../../components/DeletePostButton";
 import VisibilityToggleButton from "../../components/VisibilityToggleButton";
@@ -67,15 +67,6 @@ export default async function AdminPostsDashboard() {
       if (!isNaN(parsed) && parsed > 0) page = parsed;
     }
   }
-
-  // Fallback for environments where above doesn't work (Next.js App Router)
-  try {
-    const params = nextSearchParams?.();
-    if (params && params.get("page")) {
-      const parsed = parseInt(params.get("page")!, 10);
-      if (!isNaN(parsed) && parsed > 0) page = parsed;
-    }
-  } catch {}
 
   // Fetch total count
   const { count: totalPosts } = await supabaseAdmin
