@@ -72,7 +72,9 @@ export async function createPost(formData: FormData) {
     if (catError) throw catError;
   }
 
-  return post.id;
+  // Redirect to admin/posts page with success param and post title for notification
+  const encodedTitle = encodeURIComponent(post.title);
+  redirect(`/admin/posts?success=1&title=${encodedTitle}`);
 }
 
 export async function updatePost(formData: FormData) {
@@ -129,7 +131,9 @@ export async function updatePost(formData: FormData) {
     if (catError) throw catError;
   }
 
-  redirect("/admin/posts");
+  // Redirect to admin/posts page with success, edit, and title params for notification
+  const encodedTitle = encodeURIComponent(title);
+  redirect(`/admin/posts?success=1&edit=1&title=${encodedTitle}`);
 }
 
 export async function deletePost(postId: string) {

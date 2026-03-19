@@ -8,6 +8,7 @@ import PostEditorForm from "@/app/components/editor/PostEditorForm";
 import CoverImageUpload from "@/app/components/editor/CoverImageUpload";
 import TagsInput from "@/app/components/editor/TagsInput";
 import StatusButtonUpdater from "@/app/components/StatusButtonUpdater";
+import StatusSubmitButton from "@/app/components/StatusSubmitButton";
 
 export default async function CreatePostPage() {
   const supabase = supabaseAdmin;
@@ -143,12 +144,13 @@ export default async function CreatePostPage() {
               <MobileRightPanel>
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-end">
-                    <button
+                    <StatusSubmitButton
                       id="publish-button"
                       className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all"
-                    >
-                      Publish
-                    </button>
+                      draftLabel="Save Draft"
+                      publishLabel="Publish"
+                      statusName="status"
+                    />
                   </div>
 
                   {/* <!-- Publish Box --> */}
@@ -186,11 +188,6 @@ export default async function CreatePostPage() {
                         <span className="font-semibold text-slate-700 dark:text-slate-200">
                           Immediately
                         </span>
-                      </div>
-                      <div className="pt-4 flex flex-col gap-2">
-                        <button className="w-full py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                          Save Draft
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -292,12 +289,13 @@ export default async function CreatePostPage() {
               <div className="hidden md:block w-80 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-background-dark/50 overflow-y-auto">
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-end">
-                    <button
+                    <StatusSubmitButton
                       id="publish-button-desktop"
                       className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all"
-                    >
-                      Publish
-                    </button>
+                      draftLabel="Save Draft"
+                      publishLabel="Publish"
+                      statusName="status"
+                    />
                   </div>
 
                   {/* <!-- Publish Box --> */}

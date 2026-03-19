@@ -2,12 +2,15 @@ import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminTopbar from "@/app/components/AdminTopbar";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { redirect, searchParams as nextSearchParams } from "next/navigation";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
 import DeletePostButton from "../../components/DeletePostButton";
 import VisibilityToggleButton from "../../components/VisibilityToggleButton";
 import FeaturedToggleButton from "../../components/FeaturedToggleButton";
 
+// NotificationWrapper import removed; now handled by ClientNotificationBridge
+import React, { Suspense } from "react";
+import ClientNotificationBridge from "../../components/ClientNotificationBridge";
 type PostWithRelations = {
   id: string;
   title: string;
@@ -51,7 +54,35 @@ export default async function AdminPostsDashboard() {
 
   const isSuperAdmin = profile.role === "superAdmin";
 
-  // 📦 Fetch posts
+  // Pagination logic
+  const PAGE_SIZE = 10;
+  // Read page number from search params (default 1)
+  let page = 1;
+  if (typeof window === "undefined") {
+    // On server, use next/navigation's searchParams
+    const url = require("url");
+    const reqUrl = url.parse(globalThis.location?.href || "", true);
+    if (reqUrl.query && reqUrl.query.page) {
+      const parsed = parseInt(reqUrl.query.page as string, 10);
+      if (!isNaN(parsed) && parsed > 0) page = parsed;
+    }
+  }
+
+  // Fallback for environments where above doesn't work (Next.js App Router)
+  try {
+    const params = nextSearchParams?.();
+    if (params && params.get("page")) {
+      const parsed = parseInt(params.get("page")!, 10);
+      if (!isNaN(parsed) && parsed > 0) page = parsed;
+    }
+  } catch {}
+
+  // Fetch total count
+  const { count: totalPosts } = await supabaseAdmin
+    .from("posts")
+    .select("id", { count: "exact", head: true });
+
+  // Fetch paginated posts
   const { data, error } = await supabaseAdmin
     .from("posts")
     .select(
@@ -77,7 +108,8 @@ export default async function AdminPostsDashboard() {
     )
   `,
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
   const posts = data as PostWithRelations[] | null;
 
@@ -103,8 +135,14 @@ export default async function AdminPostsDashboard() {
     return <p className="text-red-500">Failed to load posts</p>;
   }
 
+  // Extract notification params for client wrapper
+  // Use a client bridge to read search params and pass to NotificationWrapper
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+      {/* Notification for post creation success */}
+      <Suspense fallback={null}>
+        <ClientNotificationBridge />
+      </Suspense>
       <div className="flex h-screen overflow-hidden">
         {/* <!-- Sidebar Navigation --> */}
         <AdminSidebar />
@@ -328,40 +366,63 @@ export default async function AdminPostsDashboard() {
               <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                 <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                   <span>Showing</span>
-                  <select className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded py-0.5 px-1 focus:ring-primary text-sm font-medium">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                  </select>
-                  <span>of 124 posts</span>
+                  <span>{(page - 1) * PAGE_SIZE + 1}</span>
+                  <span>-</span>
+                  <span>{Math.min(page * PAGE_SIZE, totalPosts ?? 0)}</span>
+                  <span>of {totalPosts ?? 0} posts</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors disabled:opacity-50"
-                    disabled
+                  {/* Previous page button */}
+                  <a
+                    href={`?page=${page - 1}`}
+                    className={`p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors ${page === 1 ? "pointer-events-none opacity-50" : ""}`}
+                    aria-disabled={page === 1}
                   >
                     <span className="material-symbols-outlined text-lg">
                       chevron_left
                     </span>
-                  </button>
-                  <button className="w-8 h-8 rounded-lg bg-primary text-white text-sm font-bold">
-                    1
-                  </button>
-                  <button className="w-8 h-8 rounded-lg text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-white dark:hover:bg-slate-900 transition-colors">
-                    2
-                  </button>
-                  <button className="w-8 h-8 rounded-lg text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-white dark:hover:bg-slate-900 transition-colors">
-                    3
-                  </button>
-                  <span className="text-slate-400 px-1">...</span>
-                  <button className="w-8 h-8 rounded-lg text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-white dark:hover:bg-slate-900 transition-colors">
-                    12
-                  </button>
-                  <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors">
+                  </a>
+                  {/* Page numbers (show up to 3 pages before/after current) */}
+                  {Array.from(
+                    { length: Math.ceil((totalPosts ?? 0) / PAGE_SIZE) },
+                    (_, i) => i + 1,
+                  )
+                    .filter(
+                      (p) =>
+                        Math.abs(p - page) <= 2 ||
+                        p === 1 ||
+                        p === Math.ceil((totalPosts ?? 0) / PAGE_SIZE),
+                    )
+                    .map((p, idx, arr) => (
+                      <React.Fragment key={p}>
+                        {idx > 0 && p - arr[idx - 1] > 1 && (
+                          <span
+                            key={`ellipsis-${p}`}
+                            className="text-slate-400 px-1"
+                          >
+                            ...
+                          </span>
+                        )}
+                        <a
+                          href={`?page=${p}`}
+                          className={`w-8 h-8 rounded-lg text-sm font-bold flex items-center justify-center ${p === page ? "bg-primary text-white" : "text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors"}`}
+                        >
+                          {p}
+                        </a>
+                      </React.Fragment>
+                    ))}
+                  {/* Next page button */}
+                  <a
+                    href={`?page=${page + 1}`}
+                    className={`p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors ${page >= Math.ceil((totalPosts ?? 0) / PAGE_SIZE) ? "pointer-events-none opacity-50" : ""}`}
+                    aria-disabled={
+                      page >= Math.ceil((totalPosts ?? 0) / PAGE_SIZE)
+                    }
+                  >
                     <span className="material-symbols-outlined text-lg">
                       chevron_right
                     </span>
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>

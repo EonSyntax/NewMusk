@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "./components/theme/theme-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,17 +14,21 @@ const grotesk = Space_Grotesk({
 });
 
 
-export const viewport: Metadata = {
+export const metadata: Metadata = {
   title: "NewMusk Blogs | Modern News Portal",
   description:
     "Stay ahead of the curve with daily insights into tech, finance, and global politics.",
-  viewport: "width=device-width, initial-scale=1.0",
-  icons: [
-    { rel: "icon", url: "/favicon.ico" },
-    { rel: "icon", url: "/favicon-32x32.png", sizes: "32x32" },
-    { rel: "icon", url: "/favicon-16x16.png", sizes: "16x16" },
-    { rel: "apple-touch-icon", url: "/apple-touch-icon.png" },
-  ],
+    icons: [
+      { rel: "icon", url: "/favicon.ico" },
+      { rel: "icon", url: "/favicon-32x32.png", sizes: "32x32" },
+      { rel: "icon", url: "/favicon-16x16.png", sizes: "16x16" },
+      { rel: "apple-touch-icon", url: "/apple-touch-icon.png" },
+    ],
+  };
+  
+export const viewport = {
+  width: "device-width",
+  initialScale: 1.0,
 };
 
 export default function RootLayout({
@@ -32,20 +37,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="../public/site.webmanifest" />
-        <link
+        <link rel="manifest" href="/site.webmanifest" />
+        {/* <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
           rel="stylesheet"
-        />
+        /> */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className={`${inter.variable} ${grotesk.variable} antialiased font-inter`}>
-        {children}
+        <ThemeProvider
+          // forcedTheme="light"
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

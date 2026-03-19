@@ -1,4 +1,6 @@
 import AdminSidebar from "@/app/components/AdminSidebar";
+import { Suspense } from "react";
+import ClientNotificationBridge from "@/app/components/ClientNotificationBridge";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import Link from "next/link";
 import PostEditorForm from "@/app/components/editor/PostEditorForm";
@@ -9,6 +11,7 @@ import CoverImageUpload from "@/app/components/editor/CoverImageUpload";
 import MobileRightPanel from "@/app/components/MobileRightPanel";
 import StatusButtonUpdater from "@/app/components/StatusButtonUpdater";
 import TagsInput from "@/app/components/editor/TagsInput";
+import StatusSubmitButton from "@/app/components/StatusSubmitButton";
 
 export default async function EditPostPage({
   params,
@@ -65,6 +68,10 @@ export default async function EditPostPage({
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+      {/* Notification for post update success */}
+      <Suspense fallback={null}>
+        <ClientNotificationBridge />
+      </Suspense>
       <div className="flex h-screen overflow-hidden">
         <AdminSidebar />
         <main className="flex-1 flex flex-col bg-white dark:bg-background-dark overflow-hidden min-h-0 h-full">
@@ -161,12 +168,13 @@ export default async function EditPostPage({
               <MobileRightPanel>
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-end">
-                    <button
+                    <StatusSubmitButton
                       id="publish-button"
                       className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all"
-                    >
-                      Publish
-                    </button>
+                      draftLabel="Save Draft"
+                      publishLabel="Publish"
+                      statusName="status"
+                    />
                   </div>
                   {/* <!-- Publish Box --> */}
                   <div className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
@@ -301,12 +309,13 @@ export default async function EditPostPage({
               <div className="hidden md:block w-80 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-background-dark/50 overflow-y-auto">
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-end">
-                    <button
+                    <StatusSubmitButton
                       id="publish-button-desktop"
                       className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all"
-                    >
-                      Publish
-                    </button>
+                      draftLabel="Save Draft"
+                      publishLabel="Publish"
+                      statusName="status"
+                    />
                   </div>
                   {/* <!-- Publish Box --> */}
                   <div className="bg-white dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-5">

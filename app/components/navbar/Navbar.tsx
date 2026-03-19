@@ -2,6 +2,7 @@ import Link from "next/link";
 import MobileHamburgerClient from "./MobileHamburgerClient";
 import UserDropdownClient from "./UserDropdownClient";
 import { createReadOnlySupabase } from "@/lib/supabase/layoutServer";
+import { ThemeSwitcher } from "../theme/theme-switcher";
 
 export default async function Navbar() {
   const supabase = await createReadOnlySupabase();
@@ -66,7 +67,7 @@ export default async function Navbar() {
                 <span className="material-symbols-outlined">search</span>
               </button>
               <MobileHamburgerClient />
-              <div>
+              <div className="flex items-center justify-center">
                 {!user ? (
                   <div className="hidden sm:flex items-center gap-2">
                     <Link
@@ -85,6 +86,7 @@ export default async function Navbar() {
                 ) : (
                   <UserDropdownClient role={role} avatarUrl={avatarUrl} />
                 )}
+                <ThemeSwitcher />
               </div>
             </div>
           </div>
