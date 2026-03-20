@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 export default function About() {
@@ -220,15 +221,15 @@ export default function About() {
           <div className="mt-24 pt-10 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-400 uppercase tracking-widest">
             <p>© 2024 NewMusk Blogs. All Rights Reserved.</p>
             <div className="flex gap-8">
-              <a className="hover:text-primary transition-colors" href="#">
+              <Link className="hover:text-primary transition-colors" href="#">
                 Privacy Policy
-              </a>
-              <a className="hover:text-primary transition-colors" href="#">
+              </Link>
+              <Link className="hover:text-primary transition-colors" href="#">
                 Terms of Service
-              </a>
-              <a className="hover:text-primary transition-colors" href="#">
+              </Link>
+              <Link className="hover:text-primary transition-colors" href="#">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
         </div>

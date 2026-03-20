@@ -198,12 +198,12 @@ export default function Login() {
                   </label>
                 </div>
                 <div className="text-sm">
-                  <a
+                  <Link
                     className="font-semibold text-primary hover:text-primary/80 transition-colors"
                     href="#"
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div>
@@ -218,12 +218,12 @@ export default function Login() {
 
             <p className="mt-10 text-center text-sm text-slate-600 dark:text-slate-400">
               Don't have an account?{" "}
-              <a
+              <Link
                 className="font-bold text-primary hover:text-primary/80 transition-colors"
                 href="/signup"
               >
                 Join the future
-              </a>
+              </Link>
             </p>
           </div>
         </div>

@@ -263,12 +263,12 @@ export default function SignUpPage() {
 
             <p className="mt-10 text-center text-sm text-slate-600 dark:text-slate-400">
               You have an account?{" "}
-              <a
+              <Link
                 className="font-bold text-primary hover:text-primary/80 transition-colors"
                 href="/login"
               >
                 Login to your account
-              </a>
+              </Link>
             </p>
           </div>
         </div>

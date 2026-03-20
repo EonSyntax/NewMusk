@@ -1,5 +1,6 @@
 import React from "react";
 import { PrintButton } from "../../components/PrintButton";
+import Link from "next/link";
 
 export default function PrivacyPolicy() {
   return (
@@ -7,9 +8,9 @@ export default function PrivacyPolicy() {
       {/* <!-- Hero Header --> */}
       <div className="mb-12 border-b border-slate-200 dark:border-slate-800 pb-8">
         <nav className="flex mb-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-          <a className="hover:text-primary transition-colors" href="#">
+          <Link className="hover:text-primary transition-colors" href="/">
             Home
-          </a>
+          </Link>
           <span className="mx-2">/</span>
           <span className="text-slate-900 dark:text-slate-100">
             Privacy Policy
@@ -22,7 +23,7 @@ export default function PrivacyPolicy() {
           <span className="material-symbols-outlined text-base">
             calendar_today
           </span>
-          <p className="text-sm">Last updated: May 24, 2024</p>
+          <p className="text-sm">Last updated: March 24, 2026</p>
           <span className="mx-2">•</span>
           <p className="text-sm">Reading time: 8 min</p>
         </div>
@@ -36,69 +37,69 @@ export default function PrivacyPolicy() {
                 Table of Contents
               </h3>
               <nav className="space-y-1">
-                <a
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-semibold text-sm transition-all border border-primary/20"
-                  href="#introduction"
+                  href="#"
                 >
                   <span className="material-symbols-outlined text-xl">
                     info
                   </span>
                   <span>1. Introduction</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-all"
-                  href="#collection"
+                  href="#"
                 >
                   <span className="material-symbols-outlined text-xl">
                     person_search
                   </span>
                   <span>2. Information Collection</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-all"
-                  href="#usage"
+                  href="#"
                 >
                   <span className="material-symbols-outlined text-xl">
                     analytics
                   </span>
                   <span>3. Use of Data</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-all"
-                  href="#cookies"
+                  href="#"
                 >
                   <span className="material-symbols-outlined text-xl">
                     cookie
                   </span>
                   <span>4. Cookies &amp; Tracking</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-all"
-                  href="#third-party"
+                  href="#"
                 >
                   <span className="material-symbols-outlined text-xl">
                     share
                   </span>
                   <span>5. Third-Party Disclosure</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-all"
-                  href="#rights"
+                  href="#"
                 >
                   <span className="material-symbols-outlined text-xl">
                     shield_person
                   </span>
                   <span>6. User Rights</span>
-                </a>
-                <a
+                </Link>
+                <Link
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-all"
-                  href="#contact"
+                  href="./contact"
                 >
                   <span className="material-symbols-outlined text-xl">
                     mail
                   </span>
                   <span>7. Contact Us</span>
-                </a>
+                </Link>
               </nav>
             </div>
             <div className="bg-primary p-6 rounded-xl text-white shadow-lg shadow-primary/20">

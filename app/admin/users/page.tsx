@@ -68,6 +68,10 @@ export default async function AdminUsers() {
     (user) => user.role === "admin" || user.role === "superAdmin",
   ).length;
 
+  const activeReadersCount = users.filter(
+    (user) => user.role === "normalUser",
+  ).length;
+
   const getRoleSpan = (role: string) => {
     if (role === "superAdmin") {
       return (
@@ -131,7 +135,7 @@ export default async function AdminUsers() {
                 <div className="flex items-baseline gap-2">
                   <h3 className="text-2xl font-black">{activeAuthorsCount}</h3>
                   <span className="text-xs font-bold text-emerald-500 flex items-center">
-                    +5%{" "}
+                    +10%{" "}
                     <span className="material-symbols-outlined text-xs">
                       trending_up
                     </span>
@@ -141,16 +145,16 @@ export default async function AdminUsers() {
               <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-500 font-medium">
-                    Pending Reviews
+                    Active Readers
                   </span>
                   <span className="material-symbols-outlined text-orange-500 text-xl">
-                    hourglass_empty
+                    family_group
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-2xl font-black">0</h3>
+                  <h3 className="text-2xl font-black">{activeReadersCount}</h3>
                   <span className="text-xs font-bold text-emerald-500 flex items-center">
-                    0%{" "}
+                    +2%{" "}
                     <span className="material-symbols-outlined text-orange-500 text-xs">
                       trending_up
                     </span>

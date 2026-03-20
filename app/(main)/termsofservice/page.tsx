@@ -27,42 +27,42 @@ export default function TOS() {
           {/* <!-- Sidebar TOC (Desktop Only) --> */}
           <aside className="hidden lg:block lg:col-span-3 sticky top-28 self-start">
             <nav className="flex flex-col space-y-2 border-l-2 border-slate-200 dark:border-slate-800 ml-4">
-              <a
+              <Link
                 className="pl-4 py-1 text-sm font-medium text-primary border-l-2 border-primary -ml-0.5 hover:text-primary"
-                href="#acceptance"
+                href="#"
               >
                 1. Acceptance of Terms
-              </a>
-              <a
+              </Link>
+              <Link
                 className="pl-4 py-1 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-                href="#conduct"
+                href="#"
               >
                 2. User Conduct
-              </a>
-              <a
+              </Link>
+              <Link
                 className="pl-4 py-1 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-                href="#property"
+                href="#"
               >
                 3. Intellectual Property
-              </a>
-              <a
+              </Link>
+              <Link
                 className="pl-4 py-1 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-                href="#liability"
+                href="#"
               >
                 4. Limitation of Liability
-              </a>
-              <a
+              </Link>
+              <Link
                 className="pl-4 py-1 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-                href="#governing"
+                href="#"
               >
                 5. Governing Law
-              </a>
-              <a
+              </Link>
+              <Link
                 className="pl-4 py-1 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-                href="#contact"
+                href="/contact"
               >
                 6. Contact Information
-              </a>
+              </Link>
             </nav>
             <div className="mt-8 p-4 bg-primary/5 rounded-xl border border-primary/10">
               <p className="text-xs font-semibold text-primary uppercase mb-2">

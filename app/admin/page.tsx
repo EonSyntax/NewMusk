@@ -136,7 +136,7 @@ export default async function AdminPage() {
                 <p className="text-slate-500 text-sm font-medium">
                   Total Views
                 </p>
-                <h3 className="text-2xl font-bold mt-1">2.4M</h3>
+                <h3 className="text-2xl font-bold mt-1">---</h3>
               </div>
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
@@ -152,7 +152,7 @@ export default async function AdminPage() {
                 <p className="text-slate-500 text-sm font-medium">
                   Total Comments
                 </p>
-                <h3 className="text-2xl font-bold mt-1">12.8k</h3>
+                <h3 className="text-2xl font-bold mt-1">---</h3>
               </div>
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-4">

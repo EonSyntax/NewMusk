@@ -348,7 +348,7 @@ export default async function CategoryPage({
               Trending Now
             </h4>
             <div className="space-y-6">
-              <a className="flex gap-4 group" href="#">
+              <Link className="flex gap-4 group" href="#">
                 <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary/20 transition-colors">
                   01
                 </span>
@@ -361,8 +361,8 @@ export default async function CategoryPage({
                     Robotics • {latestPost?.read_time_minutes || 5}m Read
                   </p>
                 </div>
-              </a>
-              <a className="flex gap-4 group" href="#">
+              </Link>
+              <Link className="flex gap-4 group" href="#">
                 <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary/20 transition-colors">
                   02
                 </span>
@@ -375,8 +375,8 @@ export default async function CategoryPage({
                     Energy • {postsList?.[1]?.read_time_minutes || 8}m Read
                   </p>
                 </div>
-              </a>
-              <a className="flex gap-4 group" href="#">
+              </Link>
+              <Link className="flex gap-4 group" href="#">
                 <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary/20 transition-colors">
                   03
                 </span>
@@ -389,7 +389,7 @@ export default async function CategoryPage({
                     Space • {postsList?.[2]?.read_time_minutes || 12}m Read
                   </p>
                 </div>
-              </a>
+              </Link>
             </div>
           </section>
           {/* <!-- AdSense Placeholder --> */}
@@ -407,48 +407,30 @@ export default async function CategoryPage({
           <section>
             <h4 className="text-lg font-bold mb-6">Popular Topics</h4>
             <div className="flex flex-wrap gap-2">
-              <a
+              <Link
                 className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
                 href="#"
               >
                 #ArtificialIntelligence
-              </a>
-              <a
+              </Link>
+              <Link
                 className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
                 href="#"
               >
                 #TeslaBot
-              </a>
-              <a
+              </Link>
+              <Link
                 className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
                 href="#"
               >
                 #ColonizeMars
-              </a>
-              <a
+              </Link>
+              <Link
                 className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
                 href="#"
               >
                 #CleanEnergy
-              </a>
-              <a
-                className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
-                href="#"
-              >
-                #CryptoFuture
-              </a>
-              <a
-                className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
-                href="#"
-              >
-                #NeuralLink
-              </a>
-              <a
-                className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium hover:border-primary hover:text-primary transition-all"
-                href="#"
-              >
-                #SelfDriving
-              </a>
+              </Link>
             </div>
           </section>
           {/* <!-- Newsletter Widget --> */}

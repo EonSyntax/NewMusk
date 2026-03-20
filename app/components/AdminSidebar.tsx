@@ -63,7 +63,7 @@ export default function AdminSidebar() {
               {navLinks.map((item) => {
                 const isActive = pathname === item.href;
                 return (
-                  <a
+                  <Link
                     key={item.href}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors ${
                       isActive
@@ -77,19 +77,19 @@ export default function AdminSidebar() {
                       {item.icon}
                     </span>
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
             <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-              <a
+              <Link
                 className="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
                 href="/admin/settings"
                 onClick={handleClose}
               >
                 <span className="material-symbols-outlined">settings</span>
                 <span>Settings</span>
-              </a>
+              </Link>
               <button className="w-full flex items-center justify-between gap-3 px-3 py-2.5 mt-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">contrast</span>
@@ -137,7 +137,7 @@ export default function AdminSidebar() {
           {navLinks.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <a
+              <Link
                 key={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors ${
                   isActive
@@ -148,18 +148,18 @@ export default function AdminSidebar() {
               >
                 <span className="material-symbols-outlined">{item.icon}</span>
                 <span>{item.label}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>
         <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-          <a
+          <Link
             className="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
             href="/admin/settings"
           >
             <span className="material-symbols-outlined">settings</span>
             <span>Settings</span>
-          </a>
+          </Link>
           <button className="w-full flex items-center justify-between gap-3 px-3 py-2.5 mt-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined">contrast</span>

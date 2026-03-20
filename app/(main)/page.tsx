@@ -48,7 +48,8 @@ export default async function Home() {
       cover_image,
       created_at,
       profiles:author_id!inner (
-        full_name
+        full_name,
+        avatar_url
       ),
       post_categories (
         categories (
@@ -66,6 +67,7 @@ export default async function Home() {
     latestPostsData?.map((post: any) => ({
       ...post,
       author_name: post.profiles?.full_name || "Unknown Author",
+      avatar_url: post.profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc",
       category: post.post_categories?.[0]?.categories?.name || "Uncategorized",
       categorySlug: post.post_categories?.[0]?.categories?.slug || "",
       formattedDate: new Date(post.created_at).toLocaleDateString("en-US", {
@@ -130,10 +132,16 @@ export default async function Home() {
                       )}
                     </span>
                     <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">
-                        person
-                      </span>
-                      {heroPost.author_name}
+                      <div className="flex items-center gap-2">
+                        <div className="size-6 rounded-full bg-slate-300 dark:bg-slate-700 overflow-hidden">
+                          <img
+                            alt="Author"
+                            data-alt="Male author portrait"
+                            src={heroPost.avatar_url}
+                          />
+                        </div>
+                        {heroPost.author_name}
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -187,7 +195,7 @@ export default async function Home() {
                 reads: "21k",
               },
             ].map((item) => (
-              <a key={item.num} className="flex gap-4 group" href="#">
+              <Link key={item.num} className="flex gap-4 group" href="#">
                 <span className="text-3xl font-black text-primary/20 group-hover:text-primary transition-colors">
                   {item.num}
                 </span>
@@ -199,7 +207,7 @@ export default async function Home() {
                     {item.category} • {item.reads} reads
                   </p>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -209,12 +217,12 @@ export default async function Home() {
       <section className="space-y-6">
         <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2">
           <h2 className="text-2xl font-bold">Featured Stories</h2>
-          <a
+          <Link
             className="text-sm font-bold text-primary hover:underline"
             href="/featuredposts"
           >
             View All
-          </a>
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {posts.length > 0 ? (
@@ -257,7 +265,7 @@ export default async function Home() {
       {/* Main Content + Sidebar Ad */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Latest Posts */}
-        <LatestPostsSection posts={latestPosts.slice(1)} />
+        <LatestPostsSection posts={latestPosts.slice(0)} />
         {/* Sidebar */}
         <aside className="lg:col-span-4 space-y-8">
           {/* Sidebar Ad */}

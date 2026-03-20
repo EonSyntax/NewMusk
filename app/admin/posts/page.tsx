@@ -242,12 +242,12 @@ export default async function AdminPostsDashboard() {
                           />
                         </td>
                         <td className="p-4">
-                          <a
+                          <Link
                             className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-primary transition-colors"
                             href={`/admin/posts/${post.id}`}
                           >
                             {post.title}
-                          </a>
+                          </Link>
                           <p className="text-xs text-slate-500 mt-0.5">
                             {formatDate(post.updated_at || post.created_at)}
                           </p>
@@ -364,7 +364,7 @@ export default async function AdminPostsDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   {/* Previous page button */}
-                  <a
+                  <Link
                     href={`?page=${page - 1}`}
                     className={`p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors ${page === 1 ? "pointer-events-none opacity-50" : ""}`}
                     aria-disabled={page === 1}
@@ -372,7 +372,7 @@ export default async function AdminPostsDashboard() {
                     <span className="material-symbols-outlined text-lg">
                       chevron_left
                     </span>
-                  </a>
+                  </Link>
                   {/* Page numbers (show up to 3 pages before/after current) */}
                   {Array.from(
                     { length: Math.ceil((totalPosts ?? 0) / PAGE_SIZE) },
@@ -394,16 +394,16 @@ export default async function AdminPostsDashboard() {
                             ...
                           </span>
                         )}
-                        <a
+                        <Link
                           href={`?page=${p}`}
                           className={`w-8 h-8 rounded-lg text-sm font-bold flex items-center justify-center ${p === page ? "bg-primary text-white" : "text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors"}`}
                         >
                           {p}
-                        </a>
+                        </Link>
                       </React.Fragment>
                     ))}
                   {/* Next page button */}
-                  <a
+                  <Link
                     href={`?page=${page + 1}`}
                     className={`p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900 transition-colors ${page >= Math.ceil((totalPosts ?? 0) / PAGE_SIZE) ? "pointer-events-none opacity-50" : ""}`}
                     aria-disabled={
@@ -413,7 +413,7 @@ export default async function AdminPostsDashboard() {
                     <span className="material-symbols-outlined text-lg">
                       chevron_right
                     </span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
