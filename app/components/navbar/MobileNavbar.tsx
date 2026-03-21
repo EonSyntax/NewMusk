@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import { ThemeSwitcher } from "../theme/theme-switcher";
 
 const catego = [
   { name: "Home", href: "/", icon: "home" },
@@ -61,6 +62,9 @@ const MobileNavbar = ({
               className="h-12 w-full"
             />
           </Link>
+          <div className="">
+            <ThemeSwitcher />
+          </div>
           <button
             className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400"
             onClick={onClose}
@@ -69,24 +73,7 @@ const MobileNavbar = ({
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        {/* Search Bar Section */}
-        <div className="px-4 py-4 bg-slate-100">
-          <label className="flex flex-col w-full group">
-            <div className="flex w-full items-stretch rounded-xl h-12 bg-slate-100 dark:bg-slate-800 border border-transparent focus-within:border-primary/50 transition-all">
-              <div className="flex items-center justify-center pl-4 text-slate-400">
-                <span className="material-symbols-outlined text-xl">
-                  search
-                </span>
-              </div>
-              <input
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-slate-400 px-4 pl-2 text-base font-normal leading-normal"
-                placeholder="Search articles..."
-                value=""
-                readOnly
-              />
-            </div>
-          </label>
-        </div>
+
         {/* Navigation Links */}
         <div className="flex-1 bg-slate-100 px-2 block lg:hidden overflow-y-auto">
           <p className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">

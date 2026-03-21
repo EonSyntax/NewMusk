@@ -86,7 +86,9 @@ export default async function Navbar() {
                 ) : (
                   <UserDropdownClient role={role} avatarUrl={avatarUrl} />
                 )}
+                <div className="hidden lg:block">
                 <ThemeSwitcher />
+                </div>
               </div>
             </div>
           </div>

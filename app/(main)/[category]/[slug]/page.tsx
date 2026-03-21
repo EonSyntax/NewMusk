@@ -82,6 +82,42 @@ export default async function BlogDetail({
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUUNHort40txaKgHoskCiy2LZ673dYRegAy_5d8m08PXuzxLboRSrDvOOfBRoY-8nw9upCpJogc93t47S8Ro2HTE0tLnI_vFnsf9RJCB8bA6kHaj3FcmnEM6g0LtLopFklkhhGsK0R4ncMEtW0gv5pxN6-pSLtXc5F9AIJFderU9MXNBW8lMmyMnfEjIrUcVl33RVwLChu2OtP5YDp75o0WzyFvbAw-JEUZUqboe7BPY2oPPWXF936UQwJ-k9QyfaDRu3JXhIGc";
   }
 
+  // --- VIEW TRACKING LOGIC ---
+  // Get IP address (for SSR, you may need to pass from middleware or headers)
+  let ipAddress = null;
+  if (!user) {
+    // Try to get IP from headers if available (SSR only, else leave null)
+    // ipAddress = headers().get('x-forwarded-for') || null;
+    // For now, leave as null for anonymous
+  }
+
+  // Check if a view exists in the last hour for this user or IP
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  let viewFilter: Record<string, any> = { post_id: post.id };
+  if (user) {
+    viewFilter.user_id = user.id;
+  } else if (ipAddress) {
+    viewFilter.ip_address = ipAddress;
+  }
+  const { count: recentViewCount } = await supabaseAdmin
+    .from("post_views")
+    .select("*", { count: "exact", head: true })
+    .match(viewFilter)
+    .gte("created_at", oneHourAgo);
+
+  if (!recentViewCount || recentViewCount === 0) {
+    // Insert new view
+    await supabaseAdmin.from("post_views").insert([
+      {
+        post_id: post.id,
+        user_id: user ? user.id : null,
+        ip_address: ipAddress,
+      },
+    ]);
+    // Increment views in posts table
+    await supabaseAdmin.rpc("increment_post_views", { postid: post.id });
+  }
+
   // Get love state for this user and post
   let initialLoved = false;
   if (user) {
@@ -166,8 +202,14 @@ export default async function BlogDetail({
             {!user && (
               <>
                 {(() => {
-                  const DisabledReactionButton = require("@/app/components/DisabledReactionButton").default;
-                  return <DisabledReactionButton count={initialLoveCount || 0} direction="col" />;
+                  const DisabledReactionButton =
+                    require("@/app/components/DisabledReactionButton").default;
+                  return (
+                    <DisabledReactionButton
+                      count={initialLoveCount || 0}
+                      direction="col"
+                    />
+                  );
                 })()}
               </>
             )}
@@ -267,10 +309,13 @@ export default async function BlogDetail({
               <span className="text-sm font-bold text-slate-400">SHARE</span>
               <div className="flex gap-2">
                 {(() => {
-                  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://yourdomain.com";
+                  const baseUrl =
+                    process.env.NEXT_PUBLIC_SITE_URL ||
+                    "https://yourdomain.com";
                   const postUrl = `${baseUrl}/${category}/${slug}`;
                   const shareText = `${post.title} - ${post.description}`;
-                  const ShareButtonClient = require("@/app/components/ShareButtonClient").default;
+                  const ShareButtonClient =
+                    require("@/app/components/ShareButtonClient").default;
                   return (
                     <>
                       {/* Twitter (X) */}
@@ -280,7 +325,10 @@ export default async function BlogDetail({
                         rel="noopener noreferrer"
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-primary hover:text-white transition-all"
                       >
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <svg
+                          className="w-4 h-4 fill-current"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
                         </svg>
                       </Link>
@@ -291,7 +339,10 @@ export default async function BlogDetail({
                         rel="noopener noreferrer"
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-[#0fb500] hover:text-white transition-all"
                       >
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <svg
+                          className="w-5 h-5 fill-current"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M12 4a8 8 0 0 0-6.895 12.06l.569.718-.697 2.359 2.32-.648.379.243A8 8 0 1 0 12 4ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10a9.96 9.96 0 0 1-5.016-1.347l-4.948 1.382 1.426-4.829-.006-.007-.033-.055A9.958 9.958 0 0 1 2 12Z" />
                           <path
                             fill="currentColor"
@@ -306,7 +357,10 @@ export default async function BlogDetail({
                         rel="noopener noreferrer"
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-[#1877f2] hover:text-white transition-all"
                       >
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <svg
+                          className="w-4 h-4 fill-current"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
                         </svg>
                       </Link>
@@ -322,7 +376,7 @@ export default async function BlogDetail({
                 })()}
               </div>
             </div>
-            </div>
+          </div>
 
           {/* <!-- Tags Section --> */}
           {Array.isArray(post.tags) && post.tags.length > 0 && (

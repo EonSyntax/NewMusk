@@ -50,34 +50,82 @@ export default async function CategoryPage({
     notFound();
   }
 
+  // Fetch all posts for this category (for main grid)
   const { data: posts, error } = await supabaseAdmin
     .from("post_categories")
     .select(
       `
-    posts (
-      id,
-      title,
-      slug,
-      description,
-      cover_image,
-      created_at,
-      updated_at,
-      status,
-      author_id,
-      read_time_minutes,
-      profiles:author_id!inner (
-        full_name, avatar_url
+      posts (
+        id,
+        title,
+        slug,
+        description,
+        cover_image,
+        created_at,
+        updated_at,
+        status,
+        author_id,
+        read_time_minutes,
+        trending_score,
+        profiles:author_id!inner (
+          full_name, avatar_url
+        )
+      ),
+      categories!inner (
+        name,
+        slug
       )
-    ),
-    categories!inner (
-      name,
-      slug
-    )
-  `,
+    `,
     )
     .eq("categories.slug", category)
     .eq("posts.status", "published")
     .order("created_at", { ascending: false });
+
+  // Fetch top 3 trending posts for this category
+  const { data: trendingPostsData } = await supabaseAdmin
+    .from("posts")
+    .select(
+      `
+      id,
+      title,
+      slug,
+      trending_score,
+      cover_image,
+      created_at,
+      views,
+      reaction,
+      post_categories (
+        categories (
+          name,
+          slug
+        )
+      )
+    `,
+    )
+    .eq("status", "published")
+    .order("trending_score", { ascending: false })
+    .limit(3);
+    
+  // Debug: log trendingPostsData to inspect structure and contents
+  console.log(
+    "DEBUG trendingPostsData:",
+    JSON.stringify(trendingPostsData, null, 2),
+  );
+
+  const trendingPosts =
+    trendingPostsData?.map((post: any, idx: number) => ({
+      num: (idx + 1).toString().padStart(2, "0"),
+      id: post.id,
+      title: post.title,
+      category: post.post_categories?.[0]?.categories?.name || "Uncategorized",
+      categorySlug: post.post_categories?.[0]?.categories?.slug || "",
+      slug: post.slug,
+      reads: post.views,
+      trending_score: post.trending_score,
+      cover_image: post.cover_image,
+      created_at: post.created_at,
+      reaction: post.reaction,
+    })) || [];
 
   const postsList =
     (posts
@@ -226,7 +274,6 @@ export default async function CategoryPage({
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
               {postsList.map((post) => (
                 <article key={post.id} className="group">
                   <Link href={`/${category}/${post.slug}`} className="block">
@@ -311,48 +358,31 @@ export default async function CategoryPage({
                 Trending Now
               </h4>
               <div className="space-y-6">
-                <Link className="flex gap-4 group" href="#">
-                  <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary transition-colors">
-                    01
-                  </span>
-                  <div>
-                    <h5 className="font-bold text-sm group-hover:text-primary dark:group-hover:text-blue-500 transition-colors leading-snug mb-1">
-                      {latestPost?.title ||
-                        "Optimus Gen 2: The End of Physical Labor?"}
-                    </h5>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                      Robotics • {latestPost?.read_time_minutes || 5}m Read
-                    </p>
+                {trendingPosts && trendingPosts.length > 0 ? (
+                  trendingPosts.map((item) => (
+                    <Link
+                      key={item.id}
+                      className="flex gap-4 group"
+                      href={`/${item.categorySlug}/${item.slug}`}
+                    >
+                      <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary transition-colors">
+                        {item.num}
+                      </span>
+                      <div>
+                        <h5 className="font-bold text-sm group-hover:text-primary dark:group-hover:text-blue-500 transition-colors leading-snug mb-1">
+                          {item.title}
+                        </h5>
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
+                          {item.category} • {item.read_time_minutes || 5}m Read
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-slate-400 text-center">
+                    No trending posts available.
                   </div>
-                </Link>
-                <Link className="flex gap-4 group" href="#">
-                  <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary transition-colors">
-                    02
-                  </span>
-                  <div>
-                    <h5 className="font-bold text-sm group-hover:text-primary dark:group-hover:text-blue-500 transition-colors leading-snug mb-1">
-                      {postsList?.[1]?.title ||
-                        "Solar Roof V3: Efficiency Gains Explained"}
-                    </h5>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                      Energy • {postsList?.[1]?.read_time_minutes || 8}m Read
-                    </p>
-                  </div>
-                </Link>
-                <Link className="flex gap-4 group" href="#">
-                  <span className="text-2xl font-black text-slate-200 dark:text-slate-800 group-hover:text-primary transition-colors">
-                    03
-                  </span>
-                  <div>
-                    <h5 className="font-bold text-sm group-hover:text-primary dark:group-hover:text-blue-500 transition-colors leading-snug mb-1">
-                      {postsList?.[2]?.title ||
-                        "Mars Habitat Prototypes: First Look"}
-                    </h5>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                      Space • {postsList?.[2]?.read_time_minutes || 12}m Read
-                    </p>
-                  </div>
-                </Link>
+                )}
               </div>
             </section>
             {/* <!-- AdSense Placeholder --> */}
