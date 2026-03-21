@@ -89,10 +89,11 @@ export default async function UserProfile() {
         .replace(" ", ", ")
     : "Jan, 23";
   return (
+    <>
+     <Navbar />
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
         {/* <!-- Sticky Top Navigation --> */}
-        <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-20 py-10">
           {/* <!-- Profile Hero Section --> */}
           <section className="flex flex-col md:flex-row items-center md:items-end gap-8 mb-12">
@@ -136,21 +137,21 @@ export default async function UserProfile() {
           {/* <!-- Stats Ribbon --> */}
           <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
             <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6 rounded-xl text-center transition-transform hover:-translate-y-1">
-              <p className="text-primary text-3xl font-bold mb-1">42</p>
+              <p className="text-primary text-3xl font-bold mb-1">---</p>
               <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">
                 Posts Saved
               </p>
             </div>
             <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6 rounded-xl text-center transition-transform hover:-translate-y-1">
-              <p className="text-slate-900 dark:text-white text-3xl font-bold mb-1">
-                128
+              <p className="text-green-600 dark:text-white text-3xl font-bold mb-1">
+                ---
               </p>
               <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">
                 Comments Made
               </p>
             </div>
             <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6 rounded-xl text-center transition-transform hover:-translate-y-1">
-              <p className="text-slate-900 dark:text-white text-3xl font-bold mb-1">
+              <p className="text-primary dark:text-white text-3xl font-bold mb-1">
                 {memberSince}
               </p>
               <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">
@@ -163,7 +164,7 @@ export default async function UserProfile() {
             <div className="flex-1">
               {/* <!-- Tabs --> */}
               <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
-                <button className="px-6 py-4 text-sm font-bold border-b-2 border-primary text-primary flex items-center gap-2">
+                <button className="px-6 py-4 text-sm font-bold border-b-2 border-primary text-primary dark:text-blue-500 flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm">
                     bookmark
                   </span>{" "}
@@ -455,5 +456,7 @@ export default async function UserProfile() {
         </footer>
       </div>
     </div>
+    </>
+     
   );
 }

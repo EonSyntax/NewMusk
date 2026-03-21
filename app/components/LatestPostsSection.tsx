@@ -24,14 +24,14 @@ export default function LatestPostsSection({ posts }: { posts: Post[] }) {
     <div className="lg:col-span-8 space-y-8">
       <div className="flex items-center gap-4">
         <h2 className="text-2xl font-bold">Latest Updates</h2>
-        <div className="flex-1 h-px bg-slate-200"></div>
+        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
       </div>
       <div className="space-y-6">
         {displayedPosts.map((post) => (
           <Link
             key={post.id}
             href={`/${post.categorySlug}/${post.slug}`}
-            className="flex flex-col sm:flex-row gap-6 bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all group"
+            className="flex flex-col sm:flex-row gap-6 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm hover:shadow-md transition-all group"
           >
             <div className="w-full sm:w-48 h-32 shrink-0 bg-slate-200 rounded-lg overflow-hidden">
               <img
@@ -42,11 +42,11 @@ export default function LatestPostsSection({ posts }: { posts: Post[] }) {
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold">
-                <span className="text-primary">{post.category}</span>
+                <span className="text-primary dark:text-blue-500">{post.category}</span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-500">{post.formattedDate}</span>
               </div>
-              <h3 className="text-xl font-bold hover:text-primary transition-colors cursor-pointer">
+              <h3 className="text-xl font-bold hover:text-primary dark:hover:text-blue-500 transition-colors cursor-pointer">
                 {post.title}
               </h3>
               <p className="text-slate-600 text-sm line-clamp-2">
@@ -57,7 +57,7 @@ export default function LatestPostsSection({ posts }: { posts: Post[] }) {
         ))}
 
         {/* Loading Skeleton State */}
-        <div className="flex flex-col sm:flex-row gap-6 p-4 border border-slate-100 rounded-xl opacity-60">
+        <div className="flex flex-col sm:flex-row gap-6 p-4 border border-slate-100 dark:border-slate-600 rounded-xl opacity-60">
           <div className="w-full sm:w-48 h-32 shrink-0 bg-slate-200 rounded-lg skeleton"></div>
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-2">

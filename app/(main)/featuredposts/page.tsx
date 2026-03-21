@@ -41,7 +41,7 @@ export default async function FeaturedPosts() {
       author_avatar: post.profiles?.avatar_url || null,
     })) || [];
 
-  const gridPosts = posts.slice(1);
+  const gridPosts = posts.slice(0);
 
   return (
     <main className="max-w-7xl mx-auto w-full px-4 md:px-10 py-8">
@@ -79,9 +79,9 @@ export default async function FeaturedPosts() {
                 />
                 <div>
                   <p className="text-slate-900 dark:text-slate-100 text-sm font-bold">
-                    Alex Rivera
+                    Oluwaseun Isaac
                   </p>
-                  <p className="text-slate-500 text-xs">Biomechanics Expert</p>
+                  <p className="text-slate-500 text-xs">CEO NewMusk Blog</p>
                 </div>
               </div>
             </div>

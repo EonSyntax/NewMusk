@@ -95,9 +95,9 @@ export default async function BlogDetail({
     .eq("reaction", "love");
 
   return (
-    <main className="w-full">
+    <main className="w-full bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
       {/* <!-- Hero Section --> */}
-      <section className="relative w-full h-[70vh] flex flex-col justify-end bg-background-dark overflow-hidden">
+      <section className="relative w-full h-[70vh] flex flex-col justify-end overflow-hidden">
         <img
           className="absolute inset-0 w-full h-full object-cover"
           data-alt={`${post.title} cover image`}

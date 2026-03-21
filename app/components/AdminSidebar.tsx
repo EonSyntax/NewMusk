@@ -1,12 +1,19 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 export default function AdminSidebar() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navLinks = [
     { href: "/admin", icon: "dashboard", label: "Overview" },
@@ -90,15 +97,20 @@ export default function AdminSidebar() {
                 <span className="material-symbols-outlined">settings</span>
                 <span>Settings</span>
               </Link>
-              <button className="w-full flex items-center justify-between gap-3 px-3 py-2.5 mt-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">contrast</span>
-                  <span>Dark Mode</span>
-                </div>
-                <div className="w-8 h-4 bg-slate-300 dark:bg-primary rounded-full relative">
-                  <div className="absolute left-1 top-1 bg-white w-2 h-2 rounded-full dark:translate-x-4 transition-transform"></div>
-                </div>
-              </button>
+              {mounted && (
+                <button
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 mt-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined">contrast</span>
+                    <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                  </div>
+                  <div className="w-8 h-4 bg-slate-300 dark:bg-primary rounded-full relative">
+                    <div className="absolute left-1 top-1 bg-white w-2 h-2 rounded-full dark:translate-x-4 transition-transform"></div>
+                  </div>
+                </button>
+              )}
               <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-800">
                 <div className="text-right">
                   <p className="text-sm font-bold">Elon Jr.</p>
@@ -160,15 +172,20 @@ export default function AdminSidebar() {
             <span className="material-symbols-outlined">settings</span>
             <span>Settings</span>
           </Link>
-          <button className="w-full flex items-center justify-between gap-3 px-3 py-2.5 mt-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined">contrast</span>
-              <span>Dark Mode</span>
-            </div>
-            <div className="w-8 h-4 bg-slate-300 dark:bg-primary rounded-full relative">
-              <div className="absolute left-1 top-1 bg-white w-2 h-2 rounded-full dark:translate-x-4 transition-transform"></div>
-            </div>
-          </button>
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full flex items-center justify-between gap-3 px-3 py-2.5 mt-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined">contrast</span>
+                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </div>
+              <div className="w-8 h-4 bg-slate-300 dark:bg-primary rounded-full relative">
+                <div className="absolute left-1 top-1 bg-white w-2 h-2 rounded-full dark:translate-x-4 transition-transform"></div>
+              </div>
+            </button>
+          )}
         </div>
       </aside>
     </>

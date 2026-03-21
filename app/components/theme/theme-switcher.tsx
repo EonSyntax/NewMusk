@@ -18,7 +18,21 @@ export function ThemeSwitcher() {
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       className="md:p-5"
     >
-      <span className="material-symbols-outlined text-primary">light_mode</span>
+      {theme === "dark" ? (
+        <span
+          className="material-symbols-outlined text-primary"
+          style={{ fontVariationSettings: '"FILL" 0' }}
+        >
+          light_mode
+        </span>
+      ) : (
+        <span
+          className="material-symbols-outlined text-gray-950"
+          style={{ fontVariationSettings: '"FILL" 1' }}
+        >
+          dark_mode
+        </span>
+      )}
     </button>
   );
 }

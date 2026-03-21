@@ -4,7 +4,7 @@ import React from "react";
 // Footer Component
 export const Footer = () => {
   return (
-    <footer className="bg-white border-t border-slate-200 pt-16 pb-8">
+    <footer className="bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Company Info */}
@@ -43,7 +43,7 @@ export const Footer = () => {
           </div>
           {/* Categories */}
           <div className="space-y-4">
-            <h4 className="font-bold text-slate-900">Categories</h4>
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">Categories</h4>
             <ul className="text-sm text-slate-500 space-y-2">
               <li>
                 <Link
@@ -81,7 +81,7 @@ export const Footer = () => {
           </div>
           {/* Company */}
           <div className="space-y-4">
-            <h4 className="font-bold text-slate-900">Company</h4>
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">Company</h4>
             <ul className="text-sm text-slate-500 space-y-2">
               <li>
                 <Link
@@ -119,7 +119,7 @@ export const Footer = () => {
           </div>
           {/* Legal */}
           <div className="space-y-4">
-            <h4 className="font-bold text-slate-900">Legal</h4>
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">Legal</h4>
             <ul className="text-sm text-slate-500 space-y-2">
               <li>
                 <Link
@@ -148,7 +148,7 @@ export const Footer = () => {
             </ul>
           </div>
         </div>
-        <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-slate-400">
             Copyright © 2026 NewMusk Blogs. All rights reserved.
           </p>

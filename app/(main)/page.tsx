@@ -81,7 +81,8 @@ export default async function Home() {
   const heroPost = latestPosts[0];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 pt-25 pb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
       {/* Header Banner Ad */}
       <div className="w-full h-24 bg-slate-200/50 flex flex-col items-center justify-center border border-dashed border-slate-300 rounded-xl overflow-hidden">
         <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
@@ -160,9 +161,9 @@ export default async function Home() {
         </div>
 
         {/* Trending Sidebar */}
-        <div className="lg:col-span-4 bg-white p-6 rounded-xl border border-primary/10 shadow-sm">
+        <div className="lg:col-span-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
           <div className="flex items-center gap-2 mb-6">
-            <span className="material-symbols-outlined text-primary">
+            <span className="material-symbols-outlined text-primary dark:text-blue-500">
               trending_up
             </span>
             <h2 className="text-xl font-bold">Trending Now</h2>
@@ -196,11 +197,11 @@ export default async function Home() {
               },
             ].map((item) => (
               <Link key={item.num} className="flex gap-4 group" href="#">
-                <span className="text-3xl font-black text-primary/20 group-hover:text-primary transition-colors">
+                <span className="text-3xl font-black text-primary/20 dark:text-slate-800 group-hover:text-primary transition-colors">
                   {item.num}
                 </span>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-sm leading-snug group-hover:text-primary/20 transition-colors">
+                  <h3 className="font-bold text-sm leading-snug group-hover:text-primary/20 dark:group-hover:text-blue-500 transition-colors">
                     {item.title}
                   </h3>
                   <p className="text-xs text-slate-500 italic">
@@ -215,10 +216,10 @@ export default async function Home() {
 
       {/* Featured Posts Grid */}
       <section className="space-y-6">
-        <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2">
+        <div className="flex justify-between items-end border-b-2 border-slate-200 dark:border-slate-800 pb-2">
           <h2 className="text-2xl font-bold">Featured Stories</h2>
           <Link
-            className="text-sm font-bold text-primary hover:underline"
+            className="text-sm font-bold text-primary dark:text-blue-500 hover:underline"
             href="/featuredposts"
           >
             View All
@@ -230,7 +231,7 @@ export default async function Home() {
               <Link
                 key={post.id}
                 href={`/${post.categorySlug}/${post.slug}`}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
+                className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
               >
                 <div className="aspect-video relative overflow-hidden">
                   <img
@@ -240,10 +241,10 @@ export default async function Home() {
                   />
                 </div>
                 <div className="p-4 space-y-2">
-                  <span className="text-[10px] font-bold text-primary uppercase">
+                  <span className="text-[10px] font-bold text-primary dark:text-blue-500 uppercase">
                     {post.category}
                   </span>
-                  <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors">
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary dark:group-hover:text-blue-500 transition-colors">
                     {post.title}
                   </h3>
                   <p className="text-xs text-slate-500 line-clamp-2">
@@ -312,7 +313,7 @@ export default async function Home() {
       <section className="space-y-12">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold border-l-4 border-primary pl-4">
+            <h2 className="text-2xl font-bold border-l-4 border-primary dark:border-blue-500 pl-4">
               Categories
             </h2>
           </div>
@@ -393,5 +394,7 @@ export default async function Home() {
         </div>
       </div>
     </main>
+    </div>
+    
   );
 }
