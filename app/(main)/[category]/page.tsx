@@ -69,13 +69,13 @@ export default async function CategoryPage({
         trending_score,
         profiles:author_id!inner (
           full_name, avatar_url
-        )
+          )
       ),
       categories!inner (
         name,
         slug
       )
-    `,
+      `,
     )
     .eq("categories.slug", category)
     .eq("posts.status", "published")
@@ -94,6 +94,7 @@ export default async function CategoryPage({
       created_at,
       views,
       reaction,
+      read_time_minutes,
       post_categories (
         categories (
           name,
@@ -106,11 +107,6 @@ export default async function CategoryPage({
     .order("trending_score", { ascending: false })
     .limit(3);
     
-  // Debug: log trendingPostsData to inspect structure and contents
-  console.log(
-    "DEBUG trendingPostsData:",
-    JSON.stringify(trendingPostsData, null, 2),
-  );
 
   const trendingPosts =
     trendingPostsData?.map((post: any, idx: number) => ({
@@ -121,6 +117,7 @@ export default async function CategoryPage({
       categorySlug: post.post_categories?.[0]?.categories?.slug || "",
       slug: post.slug,
       reads: post.views,
+      readTime: post.read_time_minutes,
       trending_score: post.trending_score,
       cover_image: post.cover_image,
       created_at: post.created_at,
@@ -373,7 +370,7 @@ export default async function CategoryPage({
                           {item.title}
                         </h5>
                         <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
-                          {item.category} • {item.read_time_minutes || 5}m Read
+                          {item.category} • {item.readTime || 5}m Read
                         </p>
                       </div>
                     </Link>
